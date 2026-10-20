@@ -1,2 +1,34 @@
 # Mascotas-Nexus
 Sistema web inteligente para la gestión, control y adopción de animales en refugios.
+
+Entorno de trabajo — Mascota Nexus
+
+1. Editores de código
+
+Para el desarrollo del proyecto integrador Mascota Nexus se utilizará Visual Studio Code (VS Code) como editor de código principal.
+
+Esta herramienta permitirá organizar y desarrollar los componentes del frontend, el backend y los archivos de configuración del sistema.
+
+Las tecnologías previstas para el desarrollo son:
+
+Frontend: React con Vite.
+
+Backend: Spring Boot 3 + Java
+
+Base de datos: PostgreSQL.
+
+2. Herramienta para control de versiones
+
+Se utilizará Git como herramienta de control de versiones para registrar los cambios realizados en el código fuente y facilitar el seguimiento del desarrollo.
+
+Como servicio de alojamiento remoto se utilizará GitHub, donde estará almacenado el repositorio del proyecto. Esto permitirá compartir el código, consultar su historial de cambios y facilitar la colaboración entre los integrantes del equipo.
+
+Repositorio del proyecto: [Agregar la URL del repositorio de GitHub].
+
+3. Suscripciones de modelos de inteligencia artificial
+
+Se utilizará ChatGPT en su modalidad gratuita como herramienta de apoyo durante el desarrollo del proyecto.
+
+Se empleará para resolver dudas técnicas, comprender conceptos de programación, analizar errores y consultar alternativas de implementación. Las respuestas generadas se revisarán y las soluciones de código se probarán antes de incorporarlas al proyecto.
+
+Para esta etapa no se contempla contratar una suscripción paga de inteligencia artificial.
