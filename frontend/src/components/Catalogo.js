@@ -1,9 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import MatchMascotas from './MatchMascotas';
 
 function Catalogo() {
   const [mascotas, setMascotas] = useState([]);
+  const [mascotasIniciales, setMascotasIniciales] = useState(null);
+  const [especiesDisponibles, setEspeciesDisponibles] = useState([]);
+  const [terminoBusqueda, setTerminoBusqueda] = useState('');
+  const [especieSeleccionada, setEspecieSeleccionada] = useState('');
+  const [cargandoMascotas, setCargandoMascotas] = useState(true);
+  const [errorMascotas, setErrorMascotas] = useState('');
   const [solicitudesUsuario, setSolicitudesUsuario] = useState([]);
   const [modalAbierto, setModalAbierto] = useState(false);
   const [mascotaSeleccionada, setMascotaSeleccionada] = useState(null);
@@ -13,14 +19,80 @@ function Catalogo() {
   const nombre = localStorage.getItem('nombre');
 
   useEffect(() => {
-    cargarMascotas();
+    let cancelado = false;
+
+    const cargarMascotasIniciales = async () => {
+      setCargandoMascotas(true);
+      setErrorMascotas('');
+      try {
+        const res = await axios.get('http://localhost:8080/api/mascotas/disponibles');
+        if (cancelado) return;
+
+        const mascotasCargadas = res.data;
+        const especies = [...new Set(mascotasCargadas.map((mascota) => mascota.especie))]
+          .sort((a, b) => a.localeCompare(b));
+        setMascotasIniciales(mascotasCargadas);
+        setMascotas(mascotasCargadas);
+        setEspeciesDisponibles(especies);
+      } catch (err) {
+        if (!cancelado) {
+          setErrorMascotas('No fue posible cargar el catálogo. Inténtalo de nuevo.');
+        }
+      } finally {
+        if (!cancelado) setCargandoMascotas(false);
+      }
+    };
+
+    cargarMascotasIniciales();
     cargarMisSolicitudes();
+
+    return () => {
+      cancelado = true;
+    };
   }, []);
 
-  const cargarMascotas = async () => {
-    const res = await axios.get('http://localhost:8080/api/mascotas/disponibles');
-    setMascotas(res.data);
-  };
+  useEffect(() => {
+    if (!especieSeleccionada) {
+      if (mascotasIniciales === null) return undefined;
+
+      setMascotas(mascotasIniciales);
+      setErrorMascotas('');
+      setCargandoMascotas(false);
+      return undefined;
+    }
+
+    let cancelado = false;
+    const cargarPorEspecie = async () => {
+      setCargandoMascotas(true);
+      setErrorMascotas('');
+      try {
+        const res = await axios.get('http://localhost:8080/api/mascotas/filtrar', {
+          params: { especie: especieSeleccionada }
+        });
+        if (!cancelado) setMascotas(res.data);
+      } catch (err) {
+        if (!cancelado) {
+          setErrorMascotas('No fue posible filtrar las mascotas. Inténtalo de nuevo.');
+        }
+      } finally {
+        if (!cancelado) setCargandoMascotas(false);
+      }
+    };
+
+    cargarPorEspecie();
+    return () => {
+      cancelado = true;
+    };
+  }, [especieSeleccionada, mascotasIniciales]);
+
+  const mascotasFiltradas = useMemo(() => {
+    const busquedaNormalizada = terminoBusqueda.trim().toLocaleLowerCase();
+    if (!busquedaNormalizada) return mascotas;
+
+    return mascotas.filter((mascota) =>
+      mascota.nombre.toLocaleLowerCase().includes(busquedaNormalizada)
+    );
+  }, [mascotas, terminoBusqueda]);
 
   const cargarMisSolicitudes = async () => {
     const res = await axios.get('http://localhost:8080/api/solicitudes');
@@ -108,36 +180,82 @@ function Catalogo() {
             <MatchMascotas />
 
             <h2 className="text-xl font-bold text-slate-800 mb-6">Encuentra a tu nuevo compañero</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {mascotas.map((m) => (
-                <div key={m.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition duration-300 flex flex-col justify-between">
-                  <div>
-                    <img 
-                      src={m.imagenUrl || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=500"} 
-                      alt={m.nombre} 
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="p-5">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="text-xl font-bold text-slate-900">{m.nombre}</h3>
-                        <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800">
-                          {m.estado}
-                        </span>
+            <div className="mb-6 grid grid-cols-1 gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-2 sm:p-5">
+              <div>
+                <label htmlFor="buscar-mascota" className="mb-1.5 block text-sm font-semibold text-slate-800">
+                  Buscar por nombre
+                </label>
+                <input
+                  id="buscar-mascota"
+                  type="search"
+                  value={terminoBusqueda}
+                  onChange={(e) => setTerminoBusqueda(e.target.value)}
+                  placeholder="Ej. Luna"
+                  className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
+                />
+              </div>
+              <div>
+                <label htmlFor="filtrar-especie" className="mb-1.5 block text-sm font-semibold text-slate-800">
+                  Filtrar por especie
+                </label>
+                <select
+                  id="filtrar-especie"
+                  value={especieSeleccionada}
+                  onChange={(e) => setEspecieSeleccionada(e.target.value)}
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
+                >
+                  <option value="">Todas las especies</option>
+                  {especiesDisponibles.map((especie) => (
+                    <option key={especie} value={especie}>{especie}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {cargandoMascotas ? (
+              <p className="rounded-xl bg-white px-4 py-6 text-center text-sm font-medium text-slate-700" role="status">
+                Cargando mascotas...
+              </p>
+            ) : errorMascotas ? (
+              <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-6 text-center text-sm font-medium text-red-800" role="alert">
+                {errorMascotas}
+              </p>
+            ) : mascotasFiltradas.length === 0 ? (
+              <p className="rounded-xl bg-white px-4 py-6 text-center text-sm font-medium text-slate-700" role="status">
+                No se encontraron mascotas que coincidan con los filtros.
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {mascotasFiltradas.map((m) => (
+                  <div key={m.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition duration-300 flex flex-col justify-between">
+                    <div>
+                      <img
+                        src={m.imagenUrl || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=500"}
+                        alt={m.nombre}
+                        className="w-full h-48 object-cover"
+                      />
+                      <div className="p-5">
+                        <div className="flex justify-between items-start mb-2">
+                          <h3 className="text-xl font-bold text-slate-900">{m.nombre}</h3>
+                          <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800">
+                            {m.estado}
+                          </span>
+                        </div>
+                        <p className="text-slate-600 text-sm mb-1"><strong>Especie:</strong> {m.especie}</p>
+                        <p className="text-slate-600 text-sm"><strong>Edad:</strong> {m.edad} {m.edad === 1 ? 'año' : 'años'}</p>
                       </div>
-                      <p className="text-slate-600 text-sm mb-1"><strong>Especie:</strong> {m.especie}</p>
-                      <p className="text-slate-600 text-sm"><strong>Edad:</strong> {m.edad} {m.edad === 1 ? 'año' : 'años'}</p>
+                    </div>
+                    <div className="p-5 pt-0">
+                      <button
+                        onClick={() => abrirModalAdopcion(m)}
+                        className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition shadow-sm">
+                        Postularme para Adopción
+                      </button>
                     </div>
                   </div>
-                  <div className="p-5 pt-0">
-                    <button 
-                      onClick={() => abrirModalAdopcion(m)}
-                      className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition shadow-sm">
-                      Postularme para Adopción
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         ) : (
           <div>
