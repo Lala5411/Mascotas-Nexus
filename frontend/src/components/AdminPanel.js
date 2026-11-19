@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import API_BASE_URL from '../api';
 
 function AdminPanel() {
   const [mascotas, setMascotas] = useState([]);
@@ -20,12 +21,12 @@ function AdminPanel() {
   }, []);
 
   const cargarMascotas = async () => {
-    const res = await axios.get('http://localhost:8080/api/mascotas');
+    const res = await axios.get(`${API_BASE_URL}/mascotas`);
     setMascotas(res.data);
   };
 
   const cargarSolicitudes = async () => {
-    const res = await axios.get('http://localhost:8080/api/solicitudes');
+    const res = await axios.get(`${API_BASE_URL}/solicitudes`);
     setSolicitudes(res.data);
   };
 
@@ -40,7 +41,7 @@ function AdminPanel() {
       formData.append('file', archivoImagen);
 
       try {
-        const uploadRes = await axios.post('http://localhost:8080/api/archivos/upload', formData, {
+        const uploadRes = await axios.post(`${API_BASE_URL}/archivos/upload`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
         urlFinal = uploadRes.data.url;
@@ -53,7 +54,7 @@ function AdminPanel() {
     }
 
     // Guardar la mascota con la URL generada por el backend
-    await axios.post('http://localhost:8080/api/mascotas', {
+    await axios.post(`${API_BASE_URL}/mascotas`, {
       nombre,
       especie,
       edad: parseInt(edad),
@@ -68,12 +69,12 @@ function AdminPanel() {
   };
 
   const eliminarMascota = async (id) => {
-    await axios.delete(`http://localhost:8080/api/mascotas/${id}`);
+    await axios.delete(`${API_BASE_URL}/mascotas/${id}`);
     cargarMascotas();
   };
 
   const responderSolicitud = async (id, nuevoEstado) => {
-    await axios.put(`http://localhost:8080/api/solicitudes/${id}/estado?estado=${nuevoEstado}`);
+    await axios.put(`${API_BASE_URL}/solicitudes/${id}/estado?estado=${nuevoEstado}`);
     cargarSolicitudes();
     cargarMascotas();
   };
@@ -160,6 +161,7 @@ function AdminPanel() {
                 <tr>
                   <th className="px-4 py-3">Mascota</th>
                   <th className="px-4 py-3">Usuario</th>
+                  <th className="px-4 py-3">Hogar y disponibilidad</th>
                   <th className="px-4 py-3">Mensaje</th>
                   <th className="px-4 py-3">Estado</th>
                   <th className="px-4 py-3">Acción</th>
@@ -170,6 +172,15 @@ function AdminPanel() {
                   <tr key={s.id}>
                     <td className="px-4 py-3 font-semibold text-slate-900">{s.mascota?.nombre}</td>
                     <td className="px-4 py-3">{s.usuario?.nombre || 'Usuario'}</td>
+                    <td className="px-4 py-3">
+                      {s.tipoVivienda && (
+                        <span>
+                          {s.tipoVivienda === 'CASA' ? 'Casa' : 'Apartamento'}
+                          <br />
+                          {s.horasLibres} h/día · {s.nivelActividad === 'ALTO' ? 'Activo' : s.nivelActividad === 'MEDIO' ? 'Moderado' : 'Tranquilo'}
+                        </span>
+                      )}
+                    </td>
                     <td className="px-4 py-3">{s.mensaje}</td>
                     <td className="px-4 py-3">
                       <span className={`px-2.5 py-1 text-xs font-bold rounded-full ${
