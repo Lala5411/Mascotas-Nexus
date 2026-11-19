@@ -12,12 +12,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class SolicitudService {
 
     private static final String PENDIENTE = "PENDIENTE";
     private static final String DISPONIBLE = "DISPONIBLE";
+    private static final String APROBADA = "APROBADA";
+    private static final String RECHAZADA = "RECHAZADA";
 
     private final SolicitudRepository solicitudRepository;
     private final MascotaRepository mascotaRepository;
@@ -81,17 +84,34 @@ public class SolicitudService {
                 .toList();
     }
 
+    @Transactional
     public Solicitud cambiarEstado(Long solicitudId, String nuevoEstado) {
-        Solicitud solicitud = solicitudRepository.findById(solicitudId)
-                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
+        if (nuevoEstado == null
+                || !(APROBADA.equalsIgnoreCase(nuevoEstado) || RECHAZADA.equalsIgnoreCase(nuevoEstado))) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "El estado debe ser APROBADA o RECHAZADA.");
+        }
 
-        solicitud.setEstado(nuevoEstado);
-        if ("APROBADA".equalsIgnoreCase(nuevoEstado)) {
+        Solicitud solicitud = solicitudRepository.findById(solicitudId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitud no encontrada."));
+
+        if (!PENDIENTE.equalsIgnoreCase(solicitud.getEstado())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "Solo se pueden revisar solicitudes pendientes.");
+        }
+
+        String estadoNormalizado = nuevoEstado.toUpperCase(Locale.ROOT);
+
+        if (APROBADA.equals(estadoNormalizado)) {
             Mascota mascota = solicitud.getMascota();
+            if (mascota == null || !DISPONIBLE.equalsIgnoreCase(mascota.getEstado())) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "La mascota ya no está disponible.");
+            }
             mascota.setEstado("ADOPTADO");
             mascotaRepository.save(mascota);
         }
 
+        solicitud.setEstado(estadoNormalizado);
         return solicitudRepository.save(solicitud);
     }
 }
