@@ -8,12 +8,12 @@ El repositorio está configurado para GitHub Copilot en VS Code. La memoria y la
 
 ### Skills y asignación a agentes
 
-| Skill | Ubicación | Propósito y cuándo usarla | Agentes |
-|---|---|---|---|
-| `spring-service-testing` | `.github/skills/` | Pruebas de servicios, controladores, repositorios y reglas de negocio al cambiar backend. | `backend-implementer`, `quality-reviewer` |
-| `react-accessible-flows` | `.github/skills/` | Flujos React accesibles, pruebas de interfaz, identidad del usuario y estados asíncronos al cambiar frontend. | `frontend-implementer`, `quality-reviewer` |
-| `java-spring-best-practices` | `backend/.github/skills/` | Arquitectura por capas, DTOs y manejo de errores al trabajar en servicios Spring. | `backend-implementer` |
-| `web-design-guidelines` | `frontend/.github/skills/` | Accesibilidad, diseño responsive y patrones Tailwind al modificar la interfaz. | `frontend-implementer` |
+| Skill | Ubicación | Propósito |
+|---|---|---|
+| `spring-service-testing` | `.github/skills/` | Pruebas de servicios, controladores, repositorios y reglas de negocio del backend. |
+| `react-accessible-flows` | `.github/skills/` | Flujos React accesibles, pruebas de interfaz, identidad del usuario y estados asíncronos. |
+| `java-spring-best-practices` | `backend/.github/skills/` | Arquitectura por capas, DTOs y manejo de errores en servicios Spring. |
+| `web-design-guidelines` | `frontend/.github/skills/` | Accesibilidad, diseño responsive y patrones Tailwind de la interfaz. |
 
 Las dos últimas skills son complementarias y están disponibles junto a las instrucciones de cada módulo.
 
