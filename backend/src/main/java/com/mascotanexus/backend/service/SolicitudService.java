@@ -16,6 +16,9 @@ import java.util.List;
 @Service
 public class SolicitudService {
 
+    private static final String PENDIENTE = "PENDIENTE";
+    private static final String DISPONIBLE = "DISPONIBLE";
+
     private final SolicitudRepository solicitudRepository;
     private final MascotaRepository mascotaRepository;
     private final UsuarioRepository usuarioRepository;
@@ -29,8 +32,38 @@ public class SolicitudService {
         this.usuarioRepository = usuarioRepository;
     }
 
+    @Transactional
     public Solicitud crearSolicitud(Solicitud solicitud) {
-        solicitud.setEstado("PENDIENTE");
+        if (solicitud == null
+                || solicitud.getUsuario() == null
+                || solicitud.getUsuario().getId() == null
+                || solicitud.getMascota() == null
+                || solicitud.getMascota().getId() == null
+                || solicitud.getMensaje() == null
+                || solicitud.getMensaje().isBlank()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "La solicitud requiere usuario, mascota y mensaje.");
+        }
+
+        Long usuarioId = solicitud.getUsuario().getId();
+        Long mascotaId = solicitud.getMascota().getId();
+        var usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado."));
+        Mascota mascota = mascotaRepository.findById(mascotaId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Mascota no encontrada."));
+
+        if (!DISPONIBLE.equalsIgnoreCase(mascota.getEstado())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "La mascota ya no está disponible.");
+        }
+        if (solicitudRepository.existsByUsuarioIdAndMascotaIdAndEstado(usuarioId, mascotaId, PENDIENTE)) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "Ya existe una solicitud pendiente para esta mascota.");
+        }
+
+        solicitud.setUsuario(usuario);
+        solicitud.setMascota(mascota);
+        solicitud.setMensaje(solicitud.getMensaje().trim());
+        solicitud.setEstado(PENDIENTE);
         return solicitudRepository.save(solicitud);
     }
 
