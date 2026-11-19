@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import MatchMascotas from './MatchMascotas';
 
@@ -10,6 +10,7 @@ function Catalogo() {
   const [especieSeleccionada, setEspecieSeleccionada] = useState('');
   const [cargandoMascotas, setCargandoMascotas] = useState(true);
   const [errorMascotas, setErrorMascotas] = useState('');
+  const [errorSolicitudes, setErrorSolicitudes] = useState('');
   const [solicitudesUsuario, setSolicitudesUsuario] = useState([]);
   const [modalAbierto, setModalAbierto] = useState(false);
   const [mascotaSeleccionada, setMascotaSeleccionada] = useState(null);
@@ -17,6 +18,23 @@ function Catalogo() {
   const [pestana, setPestana] = useState('catalogo'); // 'catalogo' o 'misSolicitudes'
 
   const nombre = localStorage.getItem('nombre');
+  const usuarioId = localStorage.getItem('usuarioId');
+
+  const cargarMisSolicitudes = useCallback(async () => {
+    if (!usuarioId) {
+      setSolicitudesUsuario([]);
+      setErrorSolicitudes('Vuelve a iniciar sesión para cargar tus postulaciones.');
+      return;
+    }
+
+    try {
+      const res = await axios.get(`http://localhost:8080/api/solicitudes/usuario/${usuarioId}`);
+      setSolicitudesUsuario(res.data);
+      setErrorSolicitudes('');
+    } catch (err) {
+      setErrorSolicitudes('No fue posible cargar tus postulaciones. Inténtalo de nuevo.');
+    }
+  }, [usuarioId]);
 
   useEffect(() => {
     let cancelado = false;
@@ -49,7 +67,7 @@ function Catalogo() {
     return () => {
       cancelado = true;
     };
-  }, []);
+  }, [cargarMisSolicitudes]);
 
   useEffect(() => {
     if (!especieSeleccionada) {
@@ -94,11 +112,6 @@ function Catalogo() {
     );
   }, [mascotas, terminoBusqueda]);
 
-  const cargarMisSolicitudes = async () => {
-    const res = await axios.get('http://localhost:8080/api/solicitudes');
-    setSolicitudesUsuario(res.data);
-  };
-
   const abrirModalAdopcion = (mascota) => {
     setMascotaSeleccionada(mascota);
     setModalAbierto(true);
@@ -106,16 +119,21 @@ function Catalogo() {
 
   const enviarSolicitud = async (e) => {
     e.preventDefault();
+    if (!usuarioId) {
+      setErrorSolicitudes('Vuelve a iniciar sesión para postularte a una mascota.');
+      return;
+    }
+
     try {
       await axios.post('http://localhost:8080/api/solicitudes', {
-        usuario: { id: 2 }, // ID del usuario estándar en la BD
+        usuario: { id: Number(usuarioId) },
         mascota: { id: mascotaSeleccionada.id },
         mensaje: mensajeMotivacion
       });
       alert('🎉 ¡Solicitud enviada con éxito!');
       setModalAbierto(false);
       setMensajeMotivacion('');
-      cargarMisSolicitudes();
+      await cargarMisSolicitudes();
     } catch (err) {
       alert('Error al enviar la solicitud.');
     }
@@ -260,6 +278,11 @@ function Catalogo() {
         ) : (
           <div>
             <h2 className="text-xl font-bold text-slate-800 mb-6">Historial de Postulaciones</h2>
+            {errorSolicitudes && (
+              <p className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
+                {errorSolicitudes}
+              </p>
+            )}
             <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
               <table className="w-full text-left text-sm text-slate-600">
                 <thead className="bg-slate-50 text-slate-700 uppercase text-xs font-bold border-b border-slate-200">
@@ -272,7 +295,7 @@ function Catalogo() {
                 <tbody className="divide-y divide-slate-200">
                   {solicitudesUsuario.map((s) => (
                     <tr key={s.id} className="hover:bg-slate-50">
-                      <td className="px-6 py-4 font-semibold text-slate-900">{s.mascota?.nombre}</td>
+                      <td className="px-6 py-4 font-semibold text-slate-900">{s.mascotaNombre}</td>
                       <td className="px-6 py-4">{s.mensaje}</td>
                       <td className="px-6 py-4">
                         <span className={`px-3 py-1 text-xs font-bold rounded-full ${
