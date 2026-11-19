@@ -36,11 +36,15 @@ class SolicitudServiceTest {
         Usuario usuario = new Usuario(3L, "Adoptante", "adoptante@example.com", "hash", "ROLE_USER");
         Mascota mascota = new Mascota(7L, "Luna", "Gato", 2, "DISPONIBLE", null);
         Solicitud solicitud = new Solicitud(5L, usuario, mascota, "Quiero adoptar", "PENDIENTE");
+        solicitud.setTipoVivienda("CASA");
+        solicitud.setHorasLibres(6);
+        solicitud.setNivelActividad("ALTO");
         when(usuarioRepository.existsById(3L)).thenReturn(true);
         when(solicitudRepository.findByUsuarioId(3L)).thenReturn(List.of(solicitud));
 
         assertEquals(
-                List.of(new SolicitudResponse(5L, 7L, "Luna", "Quiero adoptar", "PENDIENTE")),
+                List.of(new SolicitudResponse(
+                        5L, 7L, "Luna", "Quiero adoptar", "PENDIENTE", "CASA", 6, "ALTO")),
                 solicitudService.listarPorUsuario(3L));
         verify(solicitudRepository).findByUsuarioId(3L);
     }

@@ -43,9 +43,16 @@ public class SolicitudService {
                 || solicitud.getMascota() == null
                 || solicitud.getMascota().getId() == null
                 || solicitud.getMensaje() == null
-                || solicitud.getMensaje().isBlank()) {
+                || solicitud.getMensaje().isBlank()
+                || solicitud.getMensaje().length() > 2000
+                || !esValorPermitido(solicitud.getTipoVivienda(), "APARTAMENTO", "CASA")
+                || solicitud.getHorasLibres() == null
+                || solicitud.getHorasLibres() < 1
+                || solicitud.getHorasLibres() > 12
+                || !esValorPermitido(solicitud.getNivelActividad(), "BAJO", "MEDIO", "ALTO")) {
             throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "La solicitud requiere usuario, mascota y mensaje.");
+                    HttpStatus.BAD_REQUEST,
+                    "La solicitud requiere usuario, mascota, mensaje de hasta 2000 caracteres y datos válidos del hogar.");
         }
 
         Long usuarioId = solicitud.getUsuario().getId();
@@ -66,8 +73,22 @@ public class SolicitudService {
         solicitud.setUsuario(usuario);
         solicitud.setMascota(mascota);
         solicitud.setMensaje(solicitud.getMensaje().trim());
+        solicitud.setTipoVivienda(solicitud.getTipoVivienda().toUpperCase(Locale.ROOT));
+        solicitud.setNivelActividad(solicitud.getNivelActividad().toUpperCase(Locale.ROOT));
         solicitud.setEstado(PENDIENTE);
         return solicitudRepository.save(solicitud);
+    }
+
+    private boolean esValorPermitido(String valor, String... valoresPermitidos) {
+        if (valor == null) {
+            return false;
+        }
+        for (String permitido : valoresPermitidos) {
+            if (permitido.equalsIgnoreCase(valor)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public List<Solicitud> listarTodas() {

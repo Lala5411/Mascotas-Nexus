@@ -28,7 +28,8 @@ class SolicitudControllerTest {
     @Test
     void listarSolicitudesPorUsuarioDevuelveSoloElResultadoDelUsuario() {
         List<SolicitudResponse> solicitudes = List.of(
-                new SolicitudResponse(8L, 7L, "Luna", "Quiero adoptar", "PENDIENTE"));
+                new SolicitudResponse(8L, 7L, "Luna", "Quiero adoptar", "PENDIENTE",
+                        "CASA", 6, "ALTO"));
         when(solicitudService.listarPorUsuario(3L)).thenReturn(solicitudes);
 
         ResponseEntity<List<SolicitudResponse>> respuesta = solicitudController.listarSolicitudesPorUsuario(3L);
