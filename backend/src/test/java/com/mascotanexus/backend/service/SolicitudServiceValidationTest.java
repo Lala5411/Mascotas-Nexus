@@ -54,6 +54,9 @@ class SolicitudServiceValidationTest {
         assertEquals(usuario, resultado.getUsuario());
         assertEquals(mascota, resultado.getMascota());
         assertEquals("Quiero adoptar", resultado.getMensaje());
+        assertEquals("CASA", resultado.getTipoVivienda());
+        assertEquals(6, resultado.getHorasLibres());
+        assertEquals("ALTO", resultado.getNivelActividad());
         assertEquals("PENDIENTE", resultado.getEstado());
         verify(solicitudRepository).save(solicitud);
     }
@@ -65,6 +68,30 @@ class SolicitudServiceValidationTest {
                 () -> solicitudService.crearSolicitud(solicitudValida("  ")));
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+        verify(solicitudRepository, never()).save(any());
+    }
+
+    @Test
+    void crearSolicitudRechazaUnMensajeDemasiadoLargoSinGuardar() {
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> solicitudService.crearSolicitud(solicitudValida("a".repeat(2001))));
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+        verify(solicitudRepository, never()).save(any());
+    }
+
+    @Test
+    void crearSolicitudRechazaDatosDeHogarInvalidosSinGuardar() {
+        Solicitud solicitud = solicitudValida("Quiero adoptar");
+        solicitud.setHorasLibres(13);
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> solicitudService.crearSolicitud(solicitud));
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+        verify(usuarioRepository, never()).findById(3L);
         verify(solicitudRepository, never()).save(any());
     }
 
@@ -110,11 +137,15 @@ class SolicitudServiceValidationTest {
     }
 
     private Solicitud solicitudValida(String mensaje) {
-        return new Solicitud(
+        Solicitud solicitud = new Solicitud(
                 null,
                 new Usuario(3L, null, null, null, null),
                 new Mascota(7L, null, null, null, null, null),
                 mensaje,
                 null);
+        solicitud.setTipoVivienda("casa");
+        solicitud.setHorasLibres(6);
+        solicitud.setNivelActividad("alto");
+        return solicitud;
     }
 }

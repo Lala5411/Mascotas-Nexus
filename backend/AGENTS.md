@@ -1,34 +1,16 @@
-# Memoria del Proyecto - Mascota Nexus (Backend)
+# Memoria del proyecto - Backend
 
-## Descripción del Proyecto
-Sistema REST API para la gestión, control y adopción de animales en refugios (Mascota Nexus).
+## Stack y estructura
 
-## Tech Stack
-- **Lenguaje:** Java 17
-- **Framework:** Spring Boot 3.x (Spring Web, Spring Data JPA, Spring Security)
-- **Seguridad:** JWT (JSON Web Tokens) y BCrypt Password Encoder
-- **Base de Datos:** PostgreSQL
+- Java 17, Spring Boot 4.1.2, Spring Web MVC, Spring Data JPA y Spring Security.
+- PostgreSQL; JWT mediante JJWT y contraseñas con BCrypt.
+- Código Java bajo `src/main/java/com/mascotanexus/backend/`, organizado en `controller/`, `dto/`, `model/`, `repository/`, `security/` y `service/`.
+- Pruebas JUnit bajo `src/test/java/`.
 
-## Comandos de Ejecución (PowerShell)
-- **Instalar dependencias y compilar:** `./mvnw clean package`
-- **Ejecutar servidor en desarrollo:** `./mvnw spring-boot:run`
-- **Ejecutar pruebas unitarias:** `./mvnw test`
+## Comandos (PowerShell)
 
-## Estructura del Código
-El proyecto sigue una arquitectura en capas desacoplada:
-- `com.mascotanexus.backend.model`: Entidades JPA `@Entity` (Usuario, Mascota, Solicitud).
-- `com.mascotanexus.backend.repository`: Interfaces `JpaRepository`.
-- `com.mascotanexus.backend.service`: Lógica de negocio (aprobación de solicitudes, match de mascotas, almacenamiento de archivos).
-- `com.mascotanexus.backend.controller`: Endpoints REST (`@RestController`).
-- `com.mascotanexus.backend.security`: Configuración de Spring Security y gestión de tokens JWT.
-- `com.mascotanexus.backend.dto`: Objetos de transferencia de datos.
+- Ejecutar: `.\mvnw.cmd spring-boot:run`
+- Probar: `.\mvnw.cmd test`
+- Probar y validar cobertura: `.\mvnw.cmd verify`
 
-## Convenciones del Equipo
-- **Nombres de clases:** PascalCase (`MascotaService`).
-- **Nombres de métodos y variables:** camelCase (`listarDisponibles`).
-- **Commits:** Seguir el estándar Conventional Commits (`feat:`, `fix:`, `chore:`).
-- **Control de versiones:** Trabajar sobre ramas descriptivas (`feat/nombre-feature`) y subir cambios mediante Pull Requests a `main`.
-
-## Lo que el Agente NO debe hacer
-- No modificar las credenciales o puertos de la base de datos en `application.properties` sin previa autorización.
-- No deshabilitar el encriptador de contraseñas `BCrypt`.
+Mantén la separación controller/service/repository y no cambies credenciales, puertos ni el uso de BCrypt.

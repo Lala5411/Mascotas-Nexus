@@ -29,3 +29,20 @@ test('guarda el ID del usuario autenticado para las operaciones de adopción', a
   await waitFor(() => expect(localStorage.getItem('usuarioId')).toBe('42'));
   expect(onLoginSuccess).toHaveBeenCalledWith(datosUsuario);
 });
+
+test('expone errores de autenticación con una alerta accesible', async () => {
+  axios.post.mockRejectedValue(new Error('Unauthorized'));
+  render(<Login onLoginSuccess={jest.fn()} />);
+
+  fireEvent.change(screen.getByLabelText('Email:'), {
+    target: { value: 'adoptante@example.com' }
+  });
+  fireEvent.change(screen.getByLabelText('Contraseña:'), {
+    target: { value: 'incorrecta' }
+  });
+  fireEvent.click(screen.getByRole('button', { name: 'Ingresar' }));
+
+  expect(await screen.findByRole('alert')).toHaveTextContent(
+    'Credenciales incorrectas. Intenta de nuevo.'
+  );
+});

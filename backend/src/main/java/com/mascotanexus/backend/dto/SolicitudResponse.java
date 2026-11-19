@@ -12,6 +12,9 @@ public class SolicitudResponse {
     private String mascotaNombre;
     private String mensaje;
     private String estado;
+    private String tipoVivienda;
+    private Integer horasLibres;
+    private String nivelActividad;
 
     public static SolicitudResponse from(Solicitud solicitud) {
         return new SolicitudResponse(
@@ -19,6 +22,9 @@ public class SolicitudResponse {
                 solicitud.getMascota().getId(),
                 solicitud.getMascota().getNombre(),
                 solicitud.getMensaje(),
-                solicitud.getEstado());
+                solicitud.getEstado(),
+                solicitud.getTipoVivienda(),
+                solicitud.getHorasLibres(),
+                solicitud.getNivelActividad());
     }
 }

@@ -1,6 +1,6 @@
 ---
 name: java-spring-best-practices
-description: Buenas prácticas de arquitectura, manejo de excepciones y Spring Boot 3. Usar al crear Controllers, Services, DTOs o refactorizar lógica en Java.
+description: Buenas prácticas de arquitectura, manejo de excepciones y Spring Boot 4. Usar al crear Controllers, Services, DTOs o refactorizar lógica en Java.
 ---
 
 # Java & Spring Boot Best Practices

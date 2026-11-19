@@ -3,7 +3,6 @@ import axios from 'axios';
 import Catalogo from './Catalogo';
 
 jest.mock('axios');
-jest.mock('./MatchMascotas', () => () => null);
 
 const mascotasIniciales = [
   { id: 1, nombre: 'Luna', especie: 'Gato', edad: 2, estado: 'DISPONIBLE' },
@@ -45,6 +44,50 @@ test('muestra la búsqueda y especies únicas cargadas del catálogo', async () 
   expect(screen.getAllByRole('option', { name: 'Gato' })).toHaveLength(1);
   expect(selector).toHaveDisplayValue('Todas las especies');
   expect(await screen.findByText('Rocky')).toBeInTheDocument();
+});
+
+test('muestra mensajes distintos para postulaciones aprobadas y rechazadas', async () => {
+  axios.get.mockImplementation((url) => {
+    if (url.endsWith('/mascotas/disponibles')) {
+      return Promise.resolve({ data: mascotasIniciales });
+    }
+    if (url.endsWith('/solicitudes/usuario/7')) {
+      return Promise.resolve({
+        data: [
+          {
+            id: 21,
+            mascotaNombre: 'Luna',
+            mensaje: 'Quiero adoptar',
+            estado: 'APROBADA',
+            tipoVivienda: 'CASA',
+            horasLibres: 6,
+            nivelActividad: 'ALTO'
+          },
+          {
+            id: 22,
+            mascotaNombre: 'Nube',
+            mensaje: 'Me interesa adoptar',
+            estado: 'RECHAZADA',
+            tipoVivienda: 'APARTAMENTO',
+            horasLibres: 3,
+            nivelActividad: 'MEDIO'
+          }
+        ]
+      });
+    }
+    return Promise.resolve({ data: [] });
+  });
+
+  render(<Catalogo />);
+  await screen.findByText('Rocky');
+  fireEvent.click(screen.getByRole('button', { name: /Mis Postulaciones/ }));
+
+  const mensajesEstado = await screen.findAllByRole('status');
+  expect(mensajesEstado.map((mensajeEstado) => mensajeEstado.textContent).join(' '))
+    .toContain('Tu postulación fue aprobada');
+  expect(mensajesEstado.map((mensajeEstado) => mensajeEstado.textContent).join(' '))
+    .toContain('puedes seguir buscando y postularte a otras mascotas');
+  expect(axios.get).toHaveBeenCalledTimes(3);
 });
 
 test('busca nombres en tiempo real sin distinguir mayúsculas', async () => {
@@ -206,15 +249,42 @@ test('restaura los resultados iniciales al seleccionar todas las especies', asyn
   expect(await screen.findByText('Rocky')).toBeInTheDocument();
 });
 
-test('envía una solicitud con el usuario autenticado y no con un ID fijo', async () => {
+test('solicita y persiste el perfil del hogar al postular con el usuario autenticado', async () => {
   const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
+  axios.post.mockImplementation((url) => {
+    if (url.endsWith('/match')) {
+      return Promise.resolve({
+        data: [{
+          mascota: mascotasIniciales[0],
+          porcentajeCompatibilidad: 85,
+          justificacion: 'Tu rutina parece compatible.'
+        }]
+      });
+    }
+    return Promise.resolve({ data: {} });
+  });
   render(<Catalogo />);
   await screen.findByText('Luna');
 
   fireEvent.click(screen.getAllByRole('button', { name: 'Postularme para Adopción' })[0]);
-  fireEvent.change(screen.getByPlaceholderText(/Tengo espacio en casa/), {
+  fireEvent.change(screen.getByRole('combobox', { name: 'Tipo de vivienda' }), {
+    target: { value: 'CASA' }
+  });
+  fireEvent.change(screen.getByRole('spinbutton', { name: 'Horas disponibles al día' }), {
+    target: { value: '6' }
+  });
+  fireEvent.change(screen.getByRole('combobox', { name: 'Ritmo de vida' }), {
+    target: { value: 'ALTO' }
+  });
+  fireEvent.change(screen.getByRole('textbox', {
+    name: '¿Por qué quieres adoptar y cómo cuidarás a Luna?'
+  }), {
     target: { value: 'Tengo espacio para adoptar.' }
   });
+
+  fireEvent.click(screen.getByRole('button', { name: 'Calcular afinidad' }));
+  expect(await screen.findByText('85% de afinidad estimada')).toBeInTheDocument();
+
   fireEvent.click(screen.getByRole('button', { name: 'Enviar Postulación' }));
 
   await waitFor(() => expect(axios.post).toHaveBeenCalledWith(
@@ -222,9 +292,17 @@ test('envía una solicitud con el usuario autenticado y no con un ID fijo', asyn
     {
       usuario: { id: 7 },
       mascota: { id: 1 },
-      mensaje: 'Tengo espacio para adoptar.'
+      mensaje: 'Tengo espacio para adoptar.',
+      tipoVivienda: 'CASA',
+      horasLibres: 6,
+      nivelActividad: 'ALTO'
     }
   ));
+  expect(axios.post).toHaveBeenCalledWith('http://localhost:8080/api/match', {
+    tipoVivienda: 'CASA',
+    horasLibres: 6,
+    nivelActividad: 'ALTO'
+  });
   expect(axios.get).toHaveBeenCalledWith('http://localhost:8080/api/solicitudes/usuario/7');
   alertSpy.mockRestore();
 });
