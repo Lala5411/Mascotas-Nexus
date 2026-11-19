@@ -1,15 +1,15 @@
 ---
 name: adoption-flow-validation
-description: Validates adoption application forms, persistence, status transitions, and applicant-visible outcomes in Mascota Nexus.
+description: Valida los formularios de solicitud de adopción, su persistencia, las transiciones de estado y los resultados que ve el solicitante en Mascota Nexus.
 ---
 
-# Adoption flow validation
+# Validación del flujo de adopción
 
-Use this skill when changing application data, submission rules, application history, or administrator decisions.
+Usa esta skill al cambiar los datos de la solicitud, las reglas de envío, el historial de solicitudes o las decisiones del administrador.
 
-1. Keep application invariants in `SolicitudService`; validate required fields, allowed values, availability, and duplicate pending applications on the server.
-2. Keep new API response shapes in DTOs and verify persisted data through the relevant read endpoint.
-3. In React tests, mock Axios and assert what an adopter or administrator can see, including loading and error feedback.
-4. In Playwright tests, use unique users and pets, verify approval and rejection outcomes in the adopter's history, and clean up only the isolated E2E database.
-5. Run `.\mvnw.cmd test` from `backend/`, then `npm test -- --watchAll=false` and `npm run build` from `frontend/`.
-6. When the browser workflow or API contract changes, run `npm run test:e2e` from `frontend/` and report any unavailable test infrastructure explicitly.
+1. Mantén las invariantes de la solicitud en `SolicitudService`; valida en el servidor los campos obligatorios, los valores permitidos, la disponibilidad y las solicitudes pendientes duplicadas.
+2. Define las nuevas formas de respuesta de la API en DTOs y verifica los datos guardados mediante el endpoint de lectura correspondiente.
+3. En las pruebas de React, simula Axios y comprueba lo que puede ver el adoptante o el administrador, incluidos los mensajes de carga y de error.
+4. En las pruebas de Playwright, usa usuarios y mascotas únicos, verifica en el historial del adoptante el resultado de la aprobación y del rechazo, y limpia solo la base de datos aislada de E2E.
+5. Ejecuta `.\mvnw.cmd test` desde `backend/`, y luego `npm test -- --watchAll=false` y `npm run build` desde `frontend/`.
+6. Cuando cambie el flujo en el navegador o el contrato de la API, ejecuta `npm run test:e2e` desde `frontend/` e informa explícitamente si alguna infraestructura de pruebas no está disponible.
