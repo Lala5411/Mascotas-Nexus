@@ -1,29 +1,29 @@
 # Mascota Nexus
 
-This repository contains a Java/Spring backend in `backend/` and a React frontend in `frontend/`.
+Este repositorio contiene un backend en Java/Spring en `backend/` y un frontend en React en `frontend/`.
 
-## Copilot harness
+## Arnés de Copilot
 
-- Read `README.md` for the agent, skill, spec, and quality-check map.
-- Workspace agents are in `.github/agents/`; their tool allow-lists define the tools available for each role.
-- Reuse a skill from `.github/skills/` when its description matches the task. Backend service rules are covered by `spring-service-testing`; accessible React work by `react-accessible-flows`; adoption submission/review flows by `adoption-flow-validation`.
-- The five features use the repository's `specs/NN-*/spec.md`, `plan.md`, and `tasks.md` structure. Spec Kit is not used.
+- Lee `README.md` para ver el mapa de agentes, skills, specs y controles de calidad.
+- Los agentes del espacio de trabajo están en `.github/agents/`; su lista de herramientas permitidas define qué herramientas tiene cada rol.
+- Reutiliza una skill de `.github/skills/` cuando su descripción coincida con la tarea. Las reglas de los servicios del backend las cubre `spring-service-testing`; el trabajo accesible en React, `react-accessible-flows`; y los flujos de envío y revisión de solicitudes de adopción, `adoption-flow-validation`.
+- Las cinco funcionalidades usan la estructura `specs/NN-*/spec.md`, `plan.md` y `tasks.md` del repositorio. No se usa Spec Kit.
 
-## Engineering rules
+## Reglas de ingeniería
 
-- Keep changes inside the relevant module and preserve the controller/service/repository boundaries in the backend.
-- Validate user input at the API boundary and enforce adoption invariants in `SolicitudService`.
-- Use DTOs for new API responses instead of exposing persistence entities.
-- Keep frontend API calls consistent with the existing `http://localhost:8080/api` base URL and use the authenticated user's ID rather than fixed IDs.
-- Add focused tests for changed behavior; do not replace meaningful tests with snapshots or assertions of implementation details.
-- Do not change database credentials, ports, password encoding, or unrelated authentication behavior.
-- Do not add reports, presentations, diagrams, or other narrative deliverables to code changes.
+- Mantén los cambios dentro del módulo que corresponde y conserva en el backend la separación controller/service/repository.
+- Valida la entrada del usuario en el borde de la API y aplica las invariantes de adopción en `SolicitudService`.
+- Usa DTOs para las respuestas nuevas de la API en lugar de exponer entidades de persistencia.
+- Mantén las llamadas del frontend a la API coherentes con la URL base existente `http://localhost:8080/api` y usa el ID del usuario autenticado en lugar de IDs fijos.
+- Añade pruebas focalizadas para el comportamiento que cambie; no reemplaces pruebas significativas por snapshots ni por aserciones sobre detalles de implementación.
+- No cambies las credenciales de la base de datos, los puertos, el cifrado de contraseñas ni comportamientos de autenticación no relacionados.
+- No añadas informes, presentaciones, diagramas ni otros entregables narrativos a los cambios de código.
 
-## Validation commands
+## Comandos de validación
 
-- Backend: `cd backend` then `./mvnw test` (Windows: `.\mvnw.cmd test`).
-- Frontend tests: `cd frontend` then `npm test -- --watchAll=false`.
-- Frontend production build: `cd frontend` then `npm run build`.
-- Browser end-to-end tests: `cd frontend` then `npm run test:e2e` (requires the isolated E2E PostgreSQL database configured by Playwright).
+- Backend: `cd backend` y luego `./mvnw test` (Windows: `.\mvnw.cmd test`).
+- Pruebas del frontend: `cd frontend` y luego `npm test -- --watchAll=false`.
+- Compilación de producción del frontend: `cd frontend` y luego `npm run build`.
+- Pruebas de extremo a extremo en el navegador: `cd frontend` y luego `npm run test:e2e` (requiere la base de datos PostgreSQL aislada para E2E que configura Playwright).
 
-The backend uses Java 17, Spring Boot, Spring Data JPA, and PostgreSQL. The frontend uses React, Axios, and Tailwind CSS.
+El backend usa Java 17, Spring Boot, Spring Data JPA y PostgreSQL. El frontend usa React, Axios y Tailwind CSS.

@@ -1,12 +1,12 @@
 ---
 name: react-accessible-flows
-description: Builds accessible and testable React workflows for the Mascota Nexus frontend.
+description: Construye flujos React accesibles y fáciles de probar para el frontend de Mascota Nexus.
 ---
 
-# React accessible flows
+# Flujos React accesibles
 
-1. Give each control an accessible name and expose loading, error, and empty states with suitable status or alert roles.
-2. Mock Axios at the component boundary and test user-visible outcomes with React Testing Library.
-3. Verify requests use the current session's stored user ID and preserve the configured API URL.
-4. Test stale asynchronous responses when a selection change can start overlapping requests.
-5. Run `npm test -- --watchAll=false` and `npm run build` from `frontend/`.
+1. Da a cada control un nombre accesible y muestra los estados de carga, error y vacío con los roles de estado o alerta adecuados.
+2. Simula Axios en el límite del componente y prueba los resultados visibles para el usuario con React Testing Library.
+3. Verifica que las peticiones usen el ID de usuario guardado en la sesión actual y conserven la URL de la API configurada.
+4. Prueba las respuestas asíncronas obsoletas cuando un cambio de selección pueda iniciar peticiones superpuestas.
+5. Ejecuta `npm test -- --watchAll=false` y `npm run build` desde `frontend/`.
