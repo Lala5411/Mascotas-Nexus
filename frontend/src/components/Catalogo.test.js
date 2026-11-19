@@ -16,7 +16,7 @@ const configurarRespuestasIniciales = () => {
     if (url.endsWith('/mascotas/disponibles')) {
       return Promise.resolve({ data: mascotasIniciales });
     }
-    if (url.endsWith('/solicitudes')) {
+    if (url.endsWith('/solicitudes/usuario/7')) {
       return Promise.resolve({ data: [] });
     }
     return Promise.resolve({ data: [] });
@@ -25,11 +25,14 @@ const configurarRespuestasIniciales = () => {
 
 beforeEach(() => {
   localStorage.setItem('nombre', 'Adoptante');
+  localStorage.setItem('usuarioId', '7');
   configurarRespuestasIniciales();
+  axios.post.mockResolvedValue({ data: {} });
 });
 
 afterEach(() => {
   jest.clearAllMocks();
+  jest.restoreAllMocks();
   localStorage.clear();
 });
 
@@ -63,7 +66,7 @@ test('combina la búsqueda por nombre con el filtro de especie del backend', asy
     if (url.endsWith('/mascotas/disponibles')) {
       return Promise.resolve({ data: mascotasIniciales });
     }
-    if (url.endsWith('/solicitudes')) {
+    if (url.endsWith('/solicitudes/usuario/7')) {
       return Promise.resolve({ data: [] });
     }
     if (url.endsWith('/mascotas/filtrar')) {
@@ -98,7 +101,7 @@ test('muestra el estado de carga al solicitar una especie', async () => {
     if (url.endsWith('/mascotas/disponibles')) {
       return Promise.resolve({ data: mascotasIniciales });
     }
-    if (url.endsWith('/solicitudes')) {
+    if (url.endsWith('/solicitudes/usuario/7')) {
       return Promise.resolve({ data: [] });
     }
     if (url.endsWith('/mascotas/filtrar')) {
@@ -126,7 +129,7 @@ test('ignora resultados de una especie anterior si llega tarde', async () => {
     if (url.endsWith('/mascotas/disponibles')) {
       return Promise.resolve({ data: mascotasIniciales });
     }
-    if (url.endsWith('/solicitudes')) {
+    if (url.endsWith('/solicitudes/usuario/7')) {
       return Promise.resolve({ data: [] });
     }
     if (url.endsWith('/mascotas/filtrar')) {
@@ -184,7 +187,7 @@ test('restaura los resultados iniciales al seleccionar todas las especies', asyn
     if (url.endsWith('/mascotas/disponibles')) {
       return Promise.resolve({ data: mascotasIniciales });
     }
-    if (url.endsWith('/solicitudes')) {
+    if (url.endsWith('/solicitudes/usuario/7')) {
       return Promise.resolve({ data: [] });
     }
     if (url.endsWith('/mascotas/filtrar')) {
@@ -201,4 +204,27 @@ test('restaura los resultados iniciales al seleccionar todas las especies', asyn
   fireEvent.change(selector, { target: { value: '' } });
 
   expect(await screen.findByText('Rocky')).toBeInTheDocument();
+});
+
+test('envía una solicitud con el usuario autenticado y no con un ID fijo', async () => {
+  const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
+  render(<Catalogo />);
+  await screen.findByText('Luna');
+
+  fireEvent.click(screen.getAllByRole('button', { name: 'Postularme para Adopción' })[0]);
+  fireEvent.change(screen.getByPlaceholderText(/Tengo espacio en casa/), {
+    target: { value: 'Tengo espacio para adoptar.' }
+  });
+  fireEvent.click(screen.getByRole('button', { name: 'Enviar Postulación' }));
+
+  await waitFor(() => expect(axios.post).toHaveBeenCalledWith(
+    'http://localhost:8080/api/solicitudes',
+    {
+      usuario: { id: 7 },
+      mascota: { id: 1 },
+      mensaje: 'Tengo espacio para adoptar.'
+    }
+  ));
+  expect(axios.get).toHaveBeenCalledWith('http://localhost:8080/api/solicitudes/usuario/7');
+  alertSpy.mockRestore();
 });

@@ -5,21 +5,24 @@ import com.mascotanexus.backend.dto.AuthResponse;
 import com.mascotanexus.backend.model.Usuario;
 import com.mascotanexus.backend.repository.UsuarioRepository;
 import com.mascotanexus.backend.security.JwtUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AuthService {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private JwtUtil jwtUtil;
+    public AuthService(
+            UsuarioRepository usuarioRepository,
+            PasswordEncoder passwordEncoder,
+            JwtUtil jwtUtil) {
+        this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
+    }
 
     public Usuario registrar(Usuario usuario) {
         // Encripta la contraseña antes de guardar
@@ -39,6 +42,6 @@ public class AuthService {
         }
 
         String token = jwtUtil.generateToken(usuario.getEmail(), usuario.getRol());
-        return new AuthResponse(token, usuario.getNombre(), usuario.getRol());
+        return new AuthResponse(token, usuario.getNombre(), usuario.getRol(), usuario.getId());
     }
 }

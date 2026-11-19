@@ -39,6 +39,7 @@ function Login({ onLoginSuccess }) {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('nombre', response.data.nombre);
         localStorage.setItem('rol', response.data.rol);
+        localStorage.setItem('usuarioId', response.data.usuarioId);
         
         onLoginSuccess(response.data);
       } catch (err) {

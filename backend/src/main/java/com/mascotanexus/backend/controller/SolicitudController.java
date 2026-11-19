@@ -1,8 +1,8 @@
 package com.mascotanexus.backend.controller;
 
+import com.mascotanexus.backend.dto.SolicitudResponse;
 import com.mascotanexus.backend.model.Solicitud;
 import com.mascotanexus.backend.service.SolicitudService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,8 +13,11 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class SolicitudController {
 
-    @Autowired
-    private SolicitudService solicitudService;
+    private final SolicitudService solicitudService;
+
+    public SolicitudController(SolicitudService solicitudService) {
+        this.solicitudService = solicitudService;
+    }
 
     @PostMapping
     public ResponseEntity<Solicitud> crearSolicitud(@RequestBody Solicitud solicitud) {
@@ -24,6 +27,11 @@ public class SolicitudController {
     @GetMapping
     public ResponseEntity<List<Solicitud>> listarSolicitudes() {
         return ResponseEntity.ok(solicitudService.listarTodas());
+    }
+
+    @GetMapping("/usuario/{usuarioId}")
+    public ResponseEntity<List<SolicitudResponse>> listarSolicitudesPorUsuario(@PathVariable Long usuarioId) {
+        return ResponseEntity.ok(solicitudService.listarPorUsuario(usuarioId));
     }
 
     @PutMapping("/{id}/estado")
