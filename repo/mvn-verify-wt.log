@@ -1,0 +1,204 @@
+[INFO] Scanning for projects...
+[INFO] Loaded 24546 auto-discovered prefixes for remote repository central (prefixes-central.txt)
+[INFO] 
+[INFO] ----------------------< com.mascotanexus:backend >----------------------
+[INFO] Building  0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (default) @ backend ---
+[INFO] Loaded 64 auto-discovered prefixes for remote repository apache.snapshots (prefixes-apache.snapshots.txt)
+[INFO] argLine set to -javaagent:C:\\Users\\qlaur\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=C:\\Users\\qlaur\\AppData\\Local\\Claude-Data\\claude_pzs8sxrjxfjjc\\scratch-workspaces\\acee9d43-fa09-4a37-a6af-23e3cfdbfe19\\4e6cd929-3a21-4988-be73-58c6419b07c3\\scratch-2026-11-19-7d15d0\\repo\\Mascotas_Nexus\\backend\\target\\jacoco.exec
+[INFO] 
+[INFO] --- resources:3.5.0:resources (default-resources) @ backend ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.15.0:compile (default-compile) @ backend ---
+[INFO] Recompiling the module because of added or removed source files.
+[INFO] Compiling 26 source files with javac [debug parameters release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.5.0:testResources (default-testResources) @ backend ---
+[INFO] skip non existing resourceDirectory C:\Users\qlaur\AppData\Local\Claude-Data\claude_pzs8sxrjxfjjc\scratch-workspaces\acee9d43-fa09-4a37-a6af-23e3cfdbfe19\4e6cd929-3a21-4988-be73-58c6419b07c3\scratch-2026-11-19-7d15d0\repo\Mascotas_Nexus\backend\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.15.0:testCompile (default-testCompile) @ backend ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 11 source files with javac [debug parameters release 17] to target\test-classes
+[INFO] 
+[INFO] --- surefire:3.5.6:test (default-test) @ backend ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.mascotanexus.backend.BackendApplicationTests
+11:23:07.981 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.mascotanexus.backend.BackendApplicationTests]: BackendApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+11:23:08.493 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.mascotanexus.backend.BackendApplication for test class com.mascotanexus.backend.BackendApplicationTests
+11:23:09.089 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.mascotanexus.backend.BackendApplicationTests]: BackendApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+11:23:09.094 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.mascotanexus.backend.BackendApplication for test class com.mascotanexus.backend.BackendApplicationTests
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.2)
+
+2026-11-19T11:23:10.693-05:00  INFO 14464 --- [           main] c.m.backend.BackendApplicationTests      : Starting BackendApplicationTests using Java 17.0.20.1 with PID 14464 (started by qlaur in C:\Users\qlaur\AppData\Local\Claude-Data\claude_pzs8sxrjxfjjc\scratch-workspaces\acee9d43-fa09-4a37-a6af-23e3cfdbfe19\4e6cd929-3a21-4988-be73-58c6419b07c3\scratch-2026-11-19-7d15d0\repo\Mascotas_Nexus\backend)
+2026-11-19T11:23:10.698-05:00  INFO 14464 --- [           main] c.m.backend.BackendApplicationTests      : No active profile set, falling back to 1 default profile: "default"
+2026-11-19T11:23:13.207-05:00  INFO 14464 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-19T11:23:13.425-05:00  INFO 14464 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 178 ms. Found 3 JPA repository interfaces.
+2026-11-19T11:23:15.358-05:00  INFO 14464 --- [           main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-11-19T11:23:15.690-05:00  INFO 14464 --- [           main] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.4.13.Final
+2026-11-19T11:23:18.560-05:00  INFO 14464 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-11-19T11:23:18.740-05:00  INFO 14464 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-11-19T11:23:19.525-05:00  INFO 14464 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@7be9e5fb
+2026-11-19T11:23:19.534-05:00  INFO 14464 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-11-19T11:23:19.746-05:00  WARN 14464 --- [           main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-11-19T11:23:19.865-05:00  INFO 14464 --- [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:5432/mascota_nexus]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 18.6
+	Default catalog/schema: mascota_nexus/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-11-19T11:23:24.749-05:00  INFO 14464 --- [           main] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-11-19T11:23:25.097-05:00  INFO 14464 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-19T11:23:25.406-05:00  INFO 14464 --- [           main] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-11-19T11:23:30.329-05:00  WARN 14464 --- [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-11-19T11:23:30.857-05:00  WARN 14464 --- [           main] .s.a.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: a80dd02d-d877-459b-9cb4-47c632c953b4
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-11-19T11:23:30.903-05:00  INFO 14464 --- [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-11-19T11:23:33.213-05:00  INFO 14464 --- [           main] c.m.backend.BackendApplicationTests      : Started BackendApplicationTests in 23.742 seconds (process running for 29.615)
+Hibernate: select u1_0.id,u1_0.email,u1_0.nombre,u1_0.password,u1_0.rol from usuario u1_0 where u1_0.email=?
+Hibernate: select u1_0.id,u1_0.email,u1_0.nombre,u1_0.password,u1_0.rol from usuario u1_0 where u1_0.email=?
+Hibernate: select count(*) from mascota m1_0
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 28.55 s -- in com.mascotanexus.backend.BackendApplicationTests
+[INFO] Running com.mascotanexus.backend.controller.MascotaControllerTest
+2026-11-19T11:23:36.692-05:00  INFO 14464 --- [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-11-19T11:23:36.692-05:00  INFO 14464 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-19T11:23:36.701-05:00  INFO 14464 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 9 ms
+2026-11-19T11:23:38.372-05:00  INFO 14464 --- [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-11-19T11:23:38.372-05:00  INFO 14464 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-19T11:23:38.372-05:00  INFO 14464 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.954 s -- in com.mascotanexus.backend.controller.MascotaControllerTest
+[INFO] Running com.mascotanexus.backend.controller.SolicitudControllerHttpTest
+2026-11-19T11:23:39.647-05:00  INFO 14464 --- [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-11-19T11:23:39.647-05:00  INFO 14464 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-19T11:23:39.647-05:00  INFO 14464 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-11-19T11:23:39.772-05:00  INFO 14464 --- [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-11-19T11:23:39.772-05:00  INFO 14464 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-19T11:23:39.772-05:00  INFO 14464 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-11-19T11:23:39.872-05:00  INFO 14464 --- [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-11-19T11:23:39.872-05:00  INFO 14464 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-19T11:23:39.872-05:00  INFO 14464 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-11-19T11:23:40.232-05:00  INFO 14464 --- [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-11-19T11:23:40.233-05:00  INFO 14464 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-19T11:23:40.233-05:00  INFO 14464 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-11-19T11:23:40.281-05:00  INFO 14464 --- [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-11-19T11:23:40.281-05:00  INFO 14464 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-19T11:23:40.283-05:00  INFO 14464 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 2 ms
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.873 s -- in com.mascotanexus.backend.controller.SolicitudControllerHttpTest
+[INFO] Running com.mascotanexus.backend.controller.SolicitudControllerTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.094 s -- in com.mascotanexus.backend.controller.SolicitudControllerTest
+[INFO] Running com.mascotanexus.backend.repository.MascotaRepositoryTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.2)
+
+2026-11-19T11:23:40.817-05:00  INFO 14464 --- [           main] c.m.b.repository.MascotaRepositoryTest   : Starting MascotaRepositoryTest using Java 17.0.20.1 with PID 14464 (started by qlaur in C:\Users\qlaur\AppData\Local\Claude-Data\claude_pzs8sxrjxfjjc\scratch-workspaces\acee9d43-fa09-4a37-a6af-23e3cfdbfe19\4e6cd929-3a21-4988-be73-58c6419b07c3\scratch-2026-11-19-7d15d0\repo\Mascotas_Nexus\backend)
+2026-11-19T11:23:40.819-05:00  INFO 14464 --- [           main] c.m.b.repository.MascotaRepositoryTest   : No active profile set, falling back to 1 default profile: "default"
+2026-11-19T11:23:41.124-05:00  INFO 14464 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-19T11:23:41.187-05:00  INFO 14464 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 54 ms. Found 3 JPA repository interfaces.
+2026-11-19T11:23:41.471-05:00  INFO 14464 --- [           main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-11-19T11:23:41.599-05:00  INFO 14464 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-11-19T11:23:41.605-05:00  INFO 14464 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+2026-11-19T11:23:41.840-05:00  INFO 14464 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-2 - Added connection org.postgresql.jdbc.PgConnection@e8d1eee
+2026-11-19T11:23:41.842-05:00  INFO 14464 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+2026-11-19T11:23:41.860-05:00  WARN 14464 --- [           main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-11-19T11:23:41.871-05:00  INFO 14464 --- [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:5432/mascota_nexus]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 18.6
+	Default catalog/schema: mascota_nexus/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-11-19T11:23:42.092-05:00  INFO 14464 --- [           main] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-11-19T11:23:42.246-05:00  INFO 14464 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-19T11:23:42.533-05:00  INFO 14464 --- [           main] c.m.b.repository.MascotaRepositoryTest   : Started MascotaRepositoryTest in 1.886 seconds (process running for 38.935)
+Hibernate: insert into mascota (edad,especie,estado,imagen_url,nombre) values (?,?,?,?,?)
+Hibernate: insert into mascota (edad,especie,estado,imagen_url,nombre) values (?,?,?,?,?)
+Hibernate: insert into mascota (edad,especie,estado,imagen_url,nombre) values (?,?,?,?,?)
+Hibernate: insert into mascota (edad,especie,estado,imagen_url,nombre) values (?,?,?,?,?)
+Hibernate: select m1_0.id,m1_0.edad,m1_0.especie,m1_0.estado,m1_0.imagen_url,m1_0.nombre from mascota m1_0 where m1_0.estado='DISPONIBLE' and (? is null or lower(m1_0.especie)=lower(?)) and (? is null or m1_0.edad<=?)
+Hibernate: insert into mascota (edad,especie,estado,imagen_url,nombre) values (?,?,?,?,?)
+Hibernate: insert into mascota (edad,especie,estado,imagen_url,nombre) values (?,?,?,?,?)
+Hibernate: insert into mascota (edad,especie,estado,imagen_url,nombre) values (?,?,?,?,?)
+Hibernate: select m1_0.id,m1_0.edad,m1_0.especie,m1_0.estado,m1_0.imagen_url,m1_0.nombre from mascota m1_0 where m1_0.estado='DISPONIBLE' and (? is null or lower(m1_0.especie)=lower(?)) and (? is null or m1_0.edad<=?)
+Hibernate: select m1_0.id,m1_0.edad,m1_0.especie,m1_0.estado,m1_0.imagen_url,m1_0.nombre from mascota m1_0 where m1_0.estado='DISPONIBLE' and (? is null or lower(m1_0.especie)=lower(?)) and (? is null or m1_0.edad<=?)
+Hibernate: select m1_0.id,m1_0.edad,m1_0.especie,m1_0.estado,m1_0.imagen_url,m1_0.nombre from mascota m1_0 where m1_0.estado='DISPONIBLE' and (? is null or lower(m1_0.especie)=lower(?)) and (? is null or m1_0.edad<=?)
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.623 s -- in com.mascotanexus.backend.repository.MascotaRepositoryTest
+[INFO] Running com.mascotanexus.backend.service.AuthServiceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.224 s -- in com.mascotanexus.backend.service.AuthServiceTest
+[INFO] Running com.mascotanexus.backend.service.MascotaServiceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.024 s -- in com.mascotanexus.backend.service.MascotaServiceTest
+[INFO] Running com.mascotanexus.backend.service.MatchServiceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.027 s -- in com.mascotanexus.backend.service.MatchServiceTest
+[INFO] Running com.mascotanexus.backend.service.SolicitudServiceStateTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.047 s -- in com.mascotanexus.backend.service.SolicitudServiceStateTest
+[INFO] Running com.mascotanexus.backend.service.SolicitudServiceTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in com.mascotanexus.backend.service.SolicitudServiceTest
+[INFO] Running com.mascotanexus.backend.service.SolicitudServiceValidationTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.046 s -- in com.mascotanexus.backend.service.SolicitudServiceValidationTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jar:3.5.1:jar (default-jar) @ backend ---
+[INFO] Building jar: C:\Users\qlaur\AppData\Local\Claude-Data\claude_pzs8sxrjxfjjc\scratch-workspaces\acee9d43-fa09-4a37-a6af-23e3cfdbfe19\4e6cd929-3a21-4988-be73-58c6419b07c3\scratch-2026-11-19-7d15d0\repo\Mascotas_Nexus\backend\target\backend-0.0.1-SNAPSHOT.jar
+[INFO] 
+[INFO] --- spring-boot:4.1.2:repackage (repackage) @ backend ---
+[INFO] Loaded 50 auto-discovered prefixes for remote repository ow2-snapshot (prefixes-ow2-snapshot.txt)
+[INFO] Replacing main artifact C:\Users\qlaur\AppData\Local\Claude-Data\claude_pzs8sxrjxfjjc\scratch-workspaces\acee9d43-fa09-4a37-a6af-23e3cfdbfe19\4e6cd929-3a21-4988-be73-58c6419b07c3\scratch-2026-11-19-7d15d0\repo\Mascotas_Nexus\backend\target\backend-0.0.1-SNAPSHOT.jar with repackaged archive, adding nested dependencies in BOOT-INF/.
+[INFO] The original artifact has been renamed to C:\Users\qlaur\AppData\Local\Claude-Data\claude_pzs8sxrjxfjjc\scratch-workspaces\acee9d43-fa09-4a37-a6af-23e3cfdbfe19\4e6cd929-3a21-4988-be73-58c6419b07c3\scratch-2026-11-19-7d15d0\repo\Mascotas_Nexus\backend\target\backend-0.0.1-SNAPSHOT.jar.original
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (coverage-report) @ backend ---
+[INFO] Loading execution data file C:\Users\qlaur\AppData\Local\Claude-Data\claude_pzs8sxrjxfjjc\scratch-workspaces\acee9d43-fa09-4a37-a6af-23e3cfdbfe19\4e6cd929-3a21-4988-be73-58c6419b07c3\scratch-2026-11-19-7d15d0\repo\Mascotas_Nexus\backend\target\jacoco.exec
+[INFO] Analyzed bundle '' with 16 classes
+[INFO] 
+[INFO] --- jacoco:0.8.12:check (coverage-check) @ backend ---
+[INFO] Loading execution data file C:\Users\qlaur\AppData\Local\Claude-Data\claude_pzs8sxrjxfjjc\scratch-workspaces\acee9d43-fa09-4a37-a6af-23e3cfdbfe19\4e6cd929-3a21-4988-be73-58c6419b07c3\scratch-2026-11-19-7d15d0\repo\Mascotas_Nexus\backend\target\jacoco.exec
+[INFO] Analyzed bundle 'backend' with 16 classes
+[INFO] All coverage checks have been met.
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  01:04 min
+[INFO] Finished at: 2026-11-19T11:23:48-05:00
+[INFO] ------------------------------------------------------------------------
+EXIT=0
