@@ -5,11 +5,15 @@ import com.mascotanexus.backend.dto.AuthResponse;
 import com.mascotanexus.backend.model.Usuario;
 import com.mascotanexus.backend.repository.UsuarioRepository;
 import com.mascotanexus.backend.security.JwtUtil;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class AuthService {
+
+    private static final String CREDENCIALES_INVALIDAS = "Credenciales incorrectas.";
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
@@ -35,10 +39,11 @@ public class AuthService {
 
     public AuthResponse login(AuthRequest request) {
         Usuario usuario = usuarioRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, CREDENCIALES_INVALIDAS));
 
         if (!passwordEncoder.matches(request.getPassword(), usuario.getPassword())) {
-            throw new RuntimeException("Contraseña incorrecta");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, CREDENCIALES_INVALIDAS);
         }
 
         String token = jwtUtil.generateToken(usuario.getEmail(), usuario.getRol());
