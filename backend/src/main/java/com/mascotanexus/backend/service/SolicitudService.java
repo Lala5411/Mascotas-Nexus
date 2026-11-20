@@ -21,6 +21,7 @@ public class SolicitudService {
     private static final String DISPONIBLE = "DISPONIBLE";
     private static final String APROBADA = "APROBADA";
     private static final String RECHAZADA = "RECHAZADA";
+    private static final String CANCELADA = "CANCELADA";
 
     private final SolicitudRepository solicitudRepository;
     private final MascotaRepository mascotaRepository;
@@ -103,6 +104,29 @@ public class SolicitudService {
         return solicitudRepository.findByUsuarioId(usuarioId).stream()
                 .map(SolicitudResponse::from)
                 .toList();
+    }
+
+    @Transactional
+    public SolicitudResponse cancelar(Long solicitudId, Long usuarioId) {
+        if (usuarioId == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Se requiere el usuario que cancela la solicitud.");
+        }
+
+        Solicitud solicitud = solicitudRepository.findById(solicitudId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitud no encontrada."));
+
+        if (solicitud.getUsuario() == null || !usuarioId.equals(solicitud.getUsuario().getId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN, "Solo puedes cancelar tus propias solicitudes.");
+        }
+        if (!PENDIENTE.equalsIgnoreCase(solicitud.getEstado())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "Solo se pueden cancelar solicitudes pendientes.");
+        }
+
+        solicitud.setEstado(CANCELADA);
+        return SolicitudResponse.from(solicitudRepository.save(solicitud));
     }
 
     @Transactional

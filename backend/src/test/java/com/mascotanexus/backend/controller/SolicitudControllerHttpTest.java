@@ -1,5 +1,7 @@
 package com.mascotanexus.backend.controller;
 
+import com.mascotanexus.backend.model.Mascota;
+import com.mascotanexus.backend.model.Solicitud;
 import com.mascotanexus.backend.model.Usuario;
 import com.mascotanexus.backend.repository.MascotaRepository;
 import com.mascotanexus.backend.repository.SolicitudRepository;
@@ -13,12 +15,14 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class SolicitudControllerHttpTest {
@@ -89,6 +93,42 @@ class SolicitudControllerHttpTest {
 
         mockMvc.perform(put("/api/solicitudes/404/estado").param("estado", "APROBADA"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void cancelarDevuelveLaSolicitudCanceladaCuandoEsDelUsuarioYEstaPendiente() throws Exception {
+        Solicitud solicitud = solicitudPendienteDelUsuario3();
+        when(solicitudRepository.findById(5L)).thenReturn(Optional.of(solicitud));
+        when(solicitudRepository.save(any(Solicitud.class))).thenAnswer(invocacion -> invocacion.getArgument(0));
+
+        mockMvc.perform(put("/api/solicitudes/5/cancelar").param("usuarioId", "3"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estado").value("CANCELADA"))
+                .andExpect(jsonPath("$.mascotaNombre").value("Luna"));
+    }
+
+    @Test
+    void cancelarDevuelveForbiddenCuandoLaSolicitudEsDeOtroUsuario() throws Exception {
+        when(solicitudRepository.findById(5L)).thenReturn(Optional.of(solicitudPendienteDelUsuario3()));
+
+        mockMvc.perform(put("/api/solicitudes/5/cancelar").param("usuarioId", "9"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void cancelarDevuelveConflictCuandoLaSolicitudYaNoEstaPendiente() throws Exception {
+        Solicitud solicitud = solicitudPendienteDelUsuario3();
+        solicitud.setEstado("RECHAZADA");
+        when(solicitudRepository.findById(5L)).thenReturn(Optional.of(solicitud));
+
+        mockMvc.perform(put("/api/solicitudes/5/cancelar").param("usuarioId", "3"))
+                .andExpect(status().isConflict());
+    }
+
+    private Solicitud solicitudPendienteDelUsuario3() {
+        Usuario usuario = new Usuario(3L, "Adoptante", "adoptante@example.com", "hash", "ROLE_USER");
+        Mascota mascota = new Mascota(7L, "Luna", "Gato", 2, "DISPONIBLE", null);
+        return new Solicitud(5L, usuario, mascota, "Quiero adoptar", "PENDIENTE");
     }
 
     private String solicitudJson(String campos) {

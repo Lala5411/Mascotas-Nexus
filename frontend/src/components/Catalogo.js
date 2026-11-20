@@ -23,6 +23,8 @@ function Catalogo() {
   const [cargandoSolicitud, setCargandoSolicitud] = useState(false);
   const [errorFormulario, setErrorFormulario] = useState('');
   const [pestana, setPestana] = useState('catalogo'); // 'catalogo' o 'misSolicitudes'
+  const [errorCancelacion, setErrorCancelacion] = useState('');
+  const [cancelandoId, setCancelandoId] = useState(null);
 
   const nombre = localStorage.getItem('nombre');
   const usuarioId = localStorage.getItem('usuarioId');
@@ -42,6 +44,23 @@ function Catalogo() {
       setErrorSolicitudes('No fue posible cargar tus postulaciones. Inténtalo de nuevo.');
     }
   }, [usuarioId]);
+
+  const cancelarSolicitud = async (solicitud) => {
+    setCancelandoId(solicitud.id);
+    setErrorCancelacion('');
+    try {
+      const res = await axios.put(
+        `${API_BASE_URL}/solicitudes/${solicitud.id}/cancelar`,
+        null,
+        { params: { usuarioId } }
+      );
+      setSolicitudesUsuario((actuales) => actuales.map((s) => (s.id === solicitud.id ? res.data : s)));
+    } catch (err) {
+      setErrorCancelacion(`No fue posible cancelar la solicitud de ${solicitud.mascotaNombre}. Actualiza el historial e inténtalo de nuevo.`);
+    } finally {
+      setCancelandoId(null);
+    }
+  };
 
   useEffect(() => {
     let cancelado = false;
@@ -355,6 +374,11 @@ function Catalogo() {
                 {errorSolicitudes}
               </p>
             )}
+            {errorCancelacion && (
+              <p className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800" role="alert">
+                {errorCancelacion}
+              </p>
+            )}
             <p className="mb-4 text-sm text-slate-600">
               Las respuestas del refugio se muestran aquí. Abre esta pestaña para actualizar el estado de tus postulaciones.
             </p>
@@ -385,10 +409,22 @@ function Catalogo() {
                         <span className={`px-3 py-1 text-xs font-bold rounded-full ${
                           s.estado === 'APROBADA' ? 'bg-green-100 text-green-800' :
                           s.estado === 'RECHAZADA' ? 'bg-red-100 text-red-800' :
+                          s.estado === 'CANCELADA' ? 'bg-slate-200 text-slate-700' :
                           'bg-amber-100 text-amber-800'
                         }`}>
                           {s.estado}
                         </span>
+                        {s.estado === 'PENDIENTE' && (
+                          <button
+                            type="button"
+                            onClick={() => cancelarSolicitud(s)}
+                            disabled={cancelandoId === s.id}
+                            aria-label={`Cancelar solicitud de ${s.mascotaNombre}`}
+                            className="ml-3 rounded-lg border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-60"
+                          >
+                            {cancelandoId === s.id ? 'Cancelando...' : 'Cancelar'}
+                          </button>
+                        )}
                         {s.estado === 'APROBADA' && (
                           <p className="mt-2 max-w-xs rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-900" role="status">
                             ¡Buenas noticias! Tu postulación fue aprobada. Comunícate con el refugio para coordinar los siguientes pasos de la adopción.

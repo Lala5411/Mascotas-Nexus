@@ -34,6 +34,13 @@ public class SolicitudController {
         return ResponseEntity.ok(solicitudService.listarPorUsuario(usuarioId));
     }
 
+    @PutMapping("/{id}/cancelar")
+    public ResponseEntity<SolicitudResponse> cancelarSolicitud(
+            @PathVariable Long id,
+            @RequestParam(required = false) Long usuarioId) {
+        return ResponseEntity.ok(solicitudService.cancelar(id, usuarioId));
+    }
+
     @PutMapping("/{id}/estado")
     public ResponseEntity<Solicitud> cambiarEstado(
             @PathVariable Long id,
