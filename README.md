@@ -2,7 +2,22 @@
 
 Aplicación de adopción con backend Java 17 / Spring Boot en `backend/`, frontend React en `frontend/` y PostgreSQL como base de datos.
 
-## Arnés de Copilot
+## Índice de la entrega
+
+Este README sigue la numeración del enunciado del proyecto integrador. Todo lo que se evalúa en el repositorio está en `main`.
+
+| Parte | Qué pide el enunciado | Dónde está |
+|---|---|---|
+| [Parte 1](#parte-1--arnés-y-readme) | Arnés (memoria, instrucciones, skills, constitución) y README | `.specify/memory/constitution.md`, `.github/copilot-instructions.md`, `CLAUDE.md`, `.github/instructions/`, `.github/skills/` y este README |
+| [Parte 2](#parte-2--sistema-de-agentes-implementado) | Sistema de agentes implementado y cambios respecto del taller | `.github/agents/`, `speckit-custom/presets/implement-orquestador/` |
+| [Parte 3](#parte-3--cinco-specs-con-desarrollo-guiado-por-especificaciones) | Cinco specs con spec, plan, tareas, pruebas y pull request fusionado | `specs/001-…` a `specs/010-…`; PR #1 a #5 y #8 |
+| [Parte 4](#parte-4--aseguramiento-de-la-calidad-y-evidencia) | Al menos dos mecanismos de calidad con evidencia | `.github/workflows/quality.yml`, `docs/quality-evidence/README.md` |
+| [Parte 5](#parte-5--exposición) | Presentación | Archivo adjunto en Q10 (no se versiona en el repositorio) |
+| Parte 6 | Reflexión por integrante | Documento PDF adjunto en Q10 (no se versiona en el repositorio) |
+
+Informe técnico completo: [`docs/INFORME_PROYECTO_INTEGRADOR.md`](./docs/INFORME_PROYECTO_INTEGRADOR.md).
+
+## Parte 1 · Arnés y README
 
 El repositorio está configurado para GitHub Copilot en VS Code y usa [Spec Kit](https://github.com/github/spec-kit) (CLI `specify` 1.4.3, integración `copilot`, scripts PowerShell) para el desarrollo guiado por especificaciones.
 
@@ -31,19 +46,6 @@ Los módulos también conservan instrucciones y skills complementarias en `backe
 | `web-design-guidelines` | `frontend/.github/skills/` | Accesibilidad, diseño responsive y patrones Tailwind de la interfaz. | Al abrir `frontend/` como espacio de trabajo propio. | Complementaria, no asignada en el frontmatter de los agentes. |
 
 La asignación de skills a agentes está declarada en el campo `skills:` de cada archivo de `.github/agents/`. Las dos últimas skills son complementarias y están disponibles junto a las instrucciones de cada módulo.
-
-### Agentes y herramientas permitidas
-
-| Agente | Responsabilidad | Modelo | Herramientas |
-|---|---|---|---|
-| `backend-implementer` | Implementar y probar backend respetando controller/service/repository. | `GPT-4.1` | `read`, `search`, `edit`, `execute` |
-| `frontend-implementer` | Implementar flujos React accesibles, API y pruebas de interacción. | `GPT-4.1` | `read`, `search`, `edit`, `execute` |
-| `quality-reviewer` | Revisar ambos módulos y ejecutar verificaciones sin herramienta de edición de archivos. | `GPT-4.1` | `read`, `search`, `execute` |
-| `spec-auditor` | Ejecutar `/speckit-converge` al terminar la implementación y añadir a `tasks.md` lo que falte. | `GPT-4.1` | `read`, `search`, `edit`, `execute` |
-
-Las listas de herramientas limitan las herramientas disponibles para cada agente; el agente de calidad no tiene la herramienta `edit`. La ejecución de comandos no equivale a un aislamiento del sistema operativo.
-
-Dentro de `/speckit-implement`, el orquestador delega cada bloque de tareas en el agente de su módulo, pide la revisión a `quality-reviewer` en cada historia y la convergencia a `spec-auditor` al final. Los agentes no se invocan entre sí y responden con un informe fijo (`ESTADO`, `TAREAS`, `ARCHIVOS`, `EVIDENCIA`, `NECESITA DE OTRO AGENTE`, `PREGUNTAS PARA LA DESARROLLADORA`).
 
 ### Cómo se usa el arnés
 
@@ -76,7 +78,38 @@ flowchart LR
    git push -u origin NNN-nombre-corto
    ```
 
-## Desarrollo guiado por especificaciones
+## Parte 2 · Sistema de agentes implementado
+
+### Agentes, modelo y herramientas permitidas
+
+| Agente | Responsabilidad | Modelo | Herramientas |
+|---|---|---|---|
+| `backend-implementer` | Implementar y probar backend respetando controller/service/repository. | `GPT-4.1` | `read`, `search`, `edit`, `execute` |
+| `frontend-implementer` | Implementar flujos React accesibles, API y pruebas de interacción. | `GPT-4.1` | `read`, `search`, `edit`, `execute` |
+| `quality-reviewer` | Revisar ambos módulos y ejecutar verificaciones sin herramienta de edición de archivos. | `GPT-4.1` | `read`, `search`, `execute` |
+| `spec-auditor` | Ejecutar `/speckit-converge` al terminar la implementación y añadir a `tasks.md` lo que falte. | `GPT-4.1` | `read`, `search`, `edit`, `execute` |
+
+Las listas de herramientas limitan las herramientas disponibles para cada agente; el agente de calidad no tiene la herramienta `edit`. La ejecución de comandos no equivale a un aislamiento del sistema operativo.
+
+Dentro de `/speckit-implement`, el orquestador delega cada bloque de tareas en el agente de su módulo, pide la revisión a `quality-reviewer` en cada historia y la convergencia a `spec-auditor` al final. Los agentes no se invocan entre sí y responden con un informe fijo (`ESTADO`, `TAREAS`, `ARCHIVOS`, `EVIDENCIA`, `NECESITA DE OTRO AGENTE`, `PREGUNTAS PARA LA DESARROLLADORA`).
+
+### Cambios respecto del taller
+
+El diseño de partida es el del *Taller 5: Sistema de agentes*: siete agentes (`orquestador-mascotas`, `auditor-contrato-api`, `backend-test-author`, `backend-implementer`, `frontend-test-author`, `frontend-implementer` y `guardian-calidad`), modelo Copilot Fusion y mutation testing (PIT y StrykerJS) como puerta de calidad. Lo implementado son los cuatro agentes de `.github/agents/` más el orquestador como preset de `/speckit-implement`. Cada cambio se apoya en lo que muestra el historial de los PR o en lo que observamos al revisar el proyecto.
+
+| Qué cambió | Qué observamos al ejecutar las specs y por qué |
+|---|---|
+| Se eliminó `orquestador-mascotas`. | Cuatro de las cinco specs tocaron un solo módulo: #1, #4 y #5 solo `backend/`, y #2 solo `frontend/`. Solo la spec 03 tocó ambos. Un orquestador repartiendo trabajo entre carriles no tenía casi nada que coordinar; la integración la controlan el PR y el CI. |
+| Se eliminó `auditor-contrato-api`. | Como el contrato HTTP solo cruzó módulos en la spec 03, se sustituyó la auditoría por evidencia ejecutable: pruebas HTTP con MockMvc (`SolicitudControllerHttpTest`) y pruebas Playwright que llaman al backend real. Una discrepancia de contrato hace fallar esas pruebas en CI. |
+| `backend-test-author` y `frontend-test-author` se fusionaron con los implementadores. | En los PR #1, #2, #4 y #5 las pruebas y el código llegaron en un solo commit: la separación Red/Green entre dos agentes no se practicó. Cada implementador escribe sus pruebas, y el CI y el revisor comprueban que existan y pasen. |
+| `guardian-calidad` pasó a ser `quality-reviewer`, con las mismas herramientas (`read`, `search`, `execute`, sin `edit`). | Se mantuvo la decisión central del taller: el revisor ejecuta y reporta, pero no se autocorrige. Se quitó la clasificación de mutantes porque no hay mutation testing (fila siguiente). |
+| El mutation testing (PIT y StrykerJS) se reemplazó por umbrales de cobertura medidos (JaCoCo y Jest) y pruebas E2E con Playwright, todo en `quality.yml`. | El taller registraba que no existía ningún workflow de CI. Se priorizó una puerta automática en cada PR: en el PR #3 detectó un fallo de `npm ci` que no se veía en local. Limitación reconocida, igual que en el taller: la cobertura mide ejecución, no la calidad de las aserciones. |
+| Se añadieron skills y la asignación `skills:` en cada agente. | El diseño del taller no tenía skills. Las specs 03 a 05 repitieron el mismo flujo de solicitudes en ambos módulos, y de ahí salió `adoption-flow-validation`. |
+| El modelo pasó de Copilot Fusion (Standard) a `GPT-4.1`. | No fue una decisión de diseño: el agente de Copilot escribió `GPT-4.1` al añadir el campo `model` durante el cierre del proyecto, y lo aceptamos sin evaluarlo contra Copilot Fusion. Lo declaramos como una diferencia no justificada; compararlos queda pendiente. |
+| Se instaló Spec Kit y se recuperó el orquestador del taller como preset de `/speckit-implement`; se añadió `spec-auditor`. | En la revisión del proyecto, el profesor señaló que lo que teníamos no era un arnés porque el flujo SDD no se ejecutaba: las specs 001 a 005 eran Markdown escritos a mano y ningún comando ni agente los generaba. Con Spec Kit el flujo `specify → plan → tasks → implement → converge` es ejecutable, y el orquestador que diseñamos en el taller vuelve como el rol de `/speckit-implement`, delegando en los agentes. `spec-auditor` cumple el papel de verificación que en el taller tenía `auditor-contrato-api`, ahora contra la spec completa. |
+| Los agentes se crearon a partir de la spec 03. | Las specs 01 y 02 se planearon con `/plan` en el chat (`backend/plan-1-grupo8.md`, `frontend/plan-2-grupo8.md`); los archivos `.github/agents/` aparecen por primera vez en el PR #3. |
+
+## Parte 3 · Cinco specs con desarrollo guiado por especificaciones
 
 ### Specs 001 a 005 (antes de Spec Kit)
 
@@ -108,7 +141,7 @@ Resultado tras la spec 010: backend 66 pruebas con los umbrales de JaCoCo cumpli
 
 Las specs 006 a 010 se integraron en `main` con un único pull request, [#8](https://github.com/Lala5411/Mascotas-Nexus/pull/8): sus ramas estaban encadenadas (cada una partía de la anterior) y el PR se abrió desde la última. Cada spec conserva su rama propia y su commit en el historial de `main`, y el CI del PR #8 pasó en verde.
 
-## Mecanismos de calidad
+## Parte 4 · Aseguramiento de la calidad y evidencia
 
 El workflow `.github/workflows/quality.yml` ejecuta:
 
@@ -123,21 +156,9 @@ El historial de PRs incluye [#1](https://github.com/Lala5411/Mascotas-Nexus/pull
 
 **Evidencia completa:** las métricas medidas en `main`, el resultado del CI de cada PR, las pruebas que verifican cada spec y las limitaciones reconocidas (entre ellas, la intermitencia del job `end-to-end` en CI) están en [`docs/quality-evidence/README.md`](./docs/quality-evidence/README.md). Los nuevos PR usan la plantilla [`.github/pull_request_template.md`](./.github/pull_request_template.md). El informe técnico completo del proyecto está en [`docs/INFORME_PROYECTO_INTEGRADOR.md`](./docs/INFORME_PROYECTO_INTEGRADOR.md).
 
-## Cambios respecto del taller
+## Parte 5 · Exposición
 
-El diseño de partida es el del *Taller 5: Sistema de agentes*: siete agentes (`orquestador-mascotas`, `auditor-contrato-api`, `backend-test-author`, `backend-implementer`, `frontend-test-author`, `frontend-implementer` y `guardian-calidad`), modelo Copilot Fusion y mutation testing (PIT y StrykerJS) como puerta de calidad. Lo implementado son los cuatro agentes de `.github/agents/` más el orquestador como preset de `/speckit-implement`. Cada cambio se apoya en lo que muestra el historial de los PR o en lo que observamos al revisar el proyecto.
-
-| Qué cambió | Qué observamos al ejecutar las specs y por qué |
-|---|---|
-| Se eliminó `orquestador-mascotas`. | Cuatro de las cinco specs tocaron un solo módulo: #1, #4 y #5 solo `backend/`, y #2 solo `frontend/`. Solo la spec 03 tocó ambos. Un orquestador repartiendo trabajo entre carriles no tenía casi nada que coordinar; la integración la controlan el PR y el CI. |
-| Se eliminó `auditor-contrato-api`. | Como el contrato HTTP solo cruzó módulos en la spec 03, se sustituyó la auditoría por evidencia ejecutable: pruebas HTTP con MockMvc (`SolicitudControllerHttpTest`) y pruebas Playwright que llaman al backend real. Una discrepancia de contrato hace fallar esas pruebas en CI. |
-| `backend-test-author` y `frontend-test-author` se fusionaron con los implementadores. | En los PR #1, #2, #4 y #5 las pruebas y el código llegaron en un solo commit: la separación Red/Green entre dos agentes no se practicó. Cada implementador escribe sus pruebas, y el CI y el revisor comprueban que existan y pasen. |
-| `guardian-calidad` pasó a ser `quality-reviewer`, con las mismas herramientas (`read`, `search`, `execute`, sin `edit`). | Se mantuvo la decisión central del taller: el revisor ejecuta y reporta, pero no se autocorrige. Se quitó la clasificación de mutantes porque no hay mutation testing (fila siguiente). |
-| El mutation testing (PIT y StrykerJS) se reemplazó por umbrales de cobertura medidos (JaCoCo y Jest) y pruebas E2E con Playwright, todo en `quality.yml`. | El taller registraba que no existía ningún workflow de CI. Se priorizó una puerta automática en cada PR: en el PR #3 detectó un fallo de `npm ci` que no se veía en local. Limitación reconocida, igual que en el taller: la cobertura mide ejecución, no la calidad de las aserciones. |
-| Se añadieron skills y la asignación `skills:` en cada agente. | El diseño del taller no tenía skills. Las specs 03 a 05 repitieron el mismo flujo de solicitudes en ambos módulos, y de ahí salió `adoption-flow-validation`. |
-| El modelo pasó de Copilot Fusion (Standard) a `GPT-4.1`. | No fue una decisión de diseño: el agente de Copilot escribió `GPT-4.1` al añadir el campo `model` durante el cierre del proyecto, y lo aceptamos sin evaluarlo contra Copilot Fusion. Lo declaramos como una diferencia no justificada; compararlos queda pendiente. |
-| Se instaló Spec Kit y se recuperó el orquestador del taller como preset de `/speckit-implement`; se añadió `spec-auditor`. | En la revisión del proyecto, el profesor señaló que lo que teníamos no era un arnés porque el flujo SDD no se ejecutaba: las specs 001 a 005 eran Markdown escritos a mano y ningún comando ni agente los generaba. Con Spec Kit el flujo `specify → plan → tasks → implement → converge` es ejecutable, y el orquestador que diseñamos en el taller vuelve como el rol de `/speckit-implement`, delegando en los agentes. `spec-auditor` cumple el papel de verificación que en el taller tenía `auditor-contrato-api`, ahora contra la spec completa. |
-| Los agentes se crearon a partir de la spec 03. | Las specs 01 y 02 se planearon con `/plan` en el chat (`backend/plan-1-grupo8.md`, `frontend/plan-2-grupo8.md`); los archivos `.github/agents/` aparecen por primera vez en el PR #3. |
+La presentación se entrega como adjunto en Q10. Recorre el arnés (parte 1), el sistema de agentes y sus cambios (parte 2), el flujo SDD con las specs (parte 3) y la evidencia de calidad (parte 4), con las cifras medidas en `main`.
 
 ## Ejecución local
 
