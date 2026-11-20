@@ -378,3 +378,62 @@ test('muestra un error si el servidor rechaza la cancelación', async () => {
   expect(await screen.findByRole('alert')).toHaveTextContent('No fue posible cancelar la solicitud');
   expect(screen.getByText('PENDIENTE')).toBeInTheDocument();
 });
+
+const nombresEnPantalla = () => screen.getAllByRole('img').map((imagen) => imagen.getAttribute('alt'));
+
+const elegirOrden = (opcion) => {
+  fireEvent.change(screen.getByRole('combobox', { name: 'Ordenar por' }), {
+    target: { value: opcion }
+  });
+};
+
+test('ordena el catálogo por nombre y por edad', async () => {
+  render(<Catalogo />);
+  await screen.findByText('Rocky');
+  expect(screen.getByRole('combobox', { name: 'Ordenar por' })).toHaveDisplayValue('Orden original');
+
+  elegirOrden('nombre-asc');
+  expect(nombresEnPantalla()).toEqual(['Luna', 'Nube', 'Rocky']);
+
+  elegirOrden('edad-asc');
+  expect(nombresEnPantalla()).toEqual(['Nube', 'Luna', 'Rocky']);
+
+  elegirOrden('edad-desc');
+  expect(nombresEnPantalla()).toEqual(['Rocky', 'Luna', 'Nube']);
+});
+
+test('mantiene el orden al buscar y no hace peticiones nuevas', async () => {
+  render(<Catalogo />);
+  await screen.findByText('Rocky');
+  const peticionesAntes = axios.get.mock.calls.length;
+
+  elegirOrden('edad-desc');
+  fireEvent.change(screen.getByRole('searchbox', { name: 'Buscar por nombre' }), {
+    target: { value: 'u' }
+  });
+
+  expect(nombresEnPantalla()).toEqual(['Luna', 'Nube']);
+  expect(axios.get.mock.calls.length).toBe(peticionesAntes);
+});
+
+test('conserva el orden original por defecto y desempata por nombre', async () => {
+  axios.get.mockImplementation((url) => {
+    if (url.endsWith('/mascotas/disponibles')) {
+      return Promise.resolve({
+        data: [
+          { id: 4, nombre: 'Rocky', especie: 'Perro', edad: 4, estado: 'DISPONIBLE' },
+          { id: 5, nombre: 'Luna', especie: 'Gato', edad: 2, estado: 'DISPONIBLE' },
+          { id: 6, nombre: 'Bruno', especie: 'Perro', edad: 2, estado: 'DISPONIBLE' }
+        ]
+      });
+    }
+    return Promise.resolve({ data: [] });
+  });
+  render(<Catalogo />);
+  await screen.findByText('Bruno');
+
+  expect(nombresEnPantalla()).toEqual(['Rocky', 'Luna', 'Bruno']);
+
+  elegirOrden('edad-asc');
+  expect(nombresEnPantalla()).toEqual(['Bruno', 'Luna', 'Rocky']);
+});

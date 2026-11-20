@@ -8,6 +8,7 @@ function Catalogo() {
   const [especiesDisponibles, setEspeciesDisponibles] = useState([]);
   const [terminoBusqueda, setTerminoBusqueda] = useState('');
   const [especieSeleccionada, setEspecieSeleccionada] = useState('');
+  const [orden, setOrden] = useState('');
   const [cargandoMascotas, setCargandoMascotas] = useState(true);
   const [errorMascotas, setErrorMascotas] = useState('');
   const [errorSolicitudes, setErrorSolicitudes] = useState('');
@@ -131,12 +132,20 @@ function Catalogo() {
 
   const mascotasFiltradas = useMemo(() => {
     const busquedaNormalizada = terminoBusqueda.trim().toLocaleLowerCase();
-    if (!busquedaNormalizada) return mascotas;
+    const filtradas = busquedaNormalizada
+      ? mascotas.filter((mascota) => mascota.nombre.toLocaleLowerCase().includes(busquedaNormalizada))
+      : mascotas;
 
-    return mascotas.filter((mascota) =>
-      mascota.nombre.toLocaleLowerCase().includes(busquedaNormalizada)
-    );
-  }, [mascotas, terminoBusqueda]);
+    if (!orden) return filtradas;
+
+    const porNombre = (a, b) => a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' });
+    const comparadores = {
+      'nombre-asc': porNombre,
+      'edad-asc': (a, b) => (a.edad - b.edad) || porNombre(a, b),
+      'edad-desc': (a, b) => (b.edad - a.edad) || porNombre(a, b)
+    };
+    return [...filtradas].sort(comparadores[orden]);
+  }, [mascotas, terminoBusqueda, orden]);
 
   const abrirModalAdopcion = (mascota) => {
     setMascotaSeleccionada(mascota);
@@ -289,7 +298,7 @@ function Catalogo() {
         {pestana === 'catalogo' ? (
           <div>
             <h2 className="text-xl font-bold text-slate-800 mb-6">Encuentra a tu nuevo compañero</h2>
-            <div className="mb-6 grid grid-cols-1 gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-2 sm:p-5">
+            <div className="mb-6 grid grid-cols-1 gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-2 sm:p-5 lg:grid-cols-3">
               <div>
                 <label htmlFor="buscar-mascota" className="mb-1.5 block text-sm font-semibold text-slate-800">
                   Buscar por nombre
@@ -317,6 +326,22 @@ function Catalogo() {
                   {especiesDisponibles.map((especie) => (
                     <option key={especie} value={especie}>{especie}</option>
                   ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="ordenar-catalogo" className="mb-1.5 block text-sm font-semibold text-slate-800">
+                  Ordenar por
+                </label>
+                <select
+                  id="ordenar-catalogo"
+                  value={orden}
+                  onChange={(e) => setOrden(e.target.value)}
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
+                >
+                  <option value="">Orden original</option>
+                  <option value="nombre-asc">Nombre (A-Z)</option>
+                  <option value="edad-asc">Edad: menor a mayor</option>
+                  <option value="edad-desc">Edad: mayor a menor</option>
                 </select>
               </div>
             </div>
