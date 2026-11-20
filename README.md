@@ -33,7 +33,7 @@ El repositorio está configurado para GitHub Copilot en VS Code y usa [Spec Kit]
 | Plantillas, scripts y workflow de Spec Kit | `.specify/templates/`, `.specify/scripts/powershell/`, `.specify/workflows/` | Generan la estructura de cada spec (`specs/NNN-nombre/`). |
 | Calidad | `.github/workflows/quality.yml` | Pruebas, cobertura con umbral y E2E en cada pull request. |
 
-Los módulos también conservan instrucciones y skills complementarias en `backend/.github/` y `frontend/.github/`.
+La memoria específica de cada módulo vive en `backend/AGENTS.md` y `frontend/AGENTS.md`. Las memorias y skills de módulo de talleres anteriores (`backend/.github/` y `frontend/.github/`) se retiraron porque duplicaban la memoria raíz, la constitución y las skills de `.github/skills/`, y Copilot no las cargaba en este monorepo.
 
 ### Skills y asignación a agentes
 
@@ -42,10 +42,7 @@ Los módulos también conservan instrucciones y skills complementarias en `backe
 | `spring-service-testing` | `.github/skills/` | Pruebas de servicios, controladores, repositorios y reglas de negocio del backend. | Al cambiar o probar código Java del backend. | `backend-implementer`, `quality-reviewer` |
 | `react-accessible-flows` | `.github/skills/` | Flujos React accesibles, pruebas de interfaz, identidad del usuario y estados asíncronos. | Al cambiar componentes o pruebas de `frontend/src/`. | `frontend-implementer`, `quality-reviewer` |
 | `adoption-flow-validation` | `.github/skills/` | Validación de postulaciones, persistencia, transiciones de estado y resultados visibles para el adoptante, incluidas las pruebas Playwright. | Al cambiar datos de la solicitud, reglas de envío, historial o decisiones del administrador. | `backend-implementer`, `frontend-implementer`, `quality-reviewer` |
-| `java-spring-best-practices` | `backend/.github/skills/` | Arquitectura por capas, DTOs y manejo de errores en servicios Spring. | Al abrir `backend/` como espacio de trabajo propio. | Complementaria, no asignada en el frontmatter de los agentes. |
-| `web-design-guidelines` | `frontend/.github/skills/` | Accesibilidad, diseño responsive y patrones Tailwind de la interfaz. | Al abrir `frontend/` como espacio de trabajo propio. | Complementaria, no asignada en el frontmatter de los agentes. |
-
-La asignación de skills a agentes está declarada en el campo `skills:` de cada archivo de `.github/agents/`. Las dos últimas skills son complementarias y están disponibles junto a las instrucciones de cada módulo.
+La asignación de skills a agentes está declarada en el campo `skills:` de cada archivo de `.github/agents/`.
 
 ### Cómo se usa el arnés
 
