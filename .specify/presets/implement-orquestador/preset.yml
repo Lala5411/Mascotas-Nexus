@@ -1,0 +1,18 @@
+schema_version: "1.0"
+
+preset:
+  id: "implement-orquestador"
+  name: "Implement orquestado para Mascota Nexus"
+  version: "1.0.0"
+  description: "Convierte /speckit-implement en un orquestador que delega cada tarea en los agentes de Mascota Nexus y nunca escribe código"
+
+requires:
+  speckit_version: ">=1.4.0"
+
+provides:
+  templates:
+    - type: "command"
+      name: "speckit.implement"
+      file: "commands/speckit.implement.md"
+      description: "Antepone el rol de orquestador, la delegación en agentes y la traza al flujo de implement"
+      strategy: "prepend"

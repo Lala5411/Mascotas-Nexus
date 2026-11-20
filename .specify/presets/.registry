@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "presets": {
+    "implement-orquestador": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:1c6586efbfe432140813474750b3a4a1ea83fb94d9582048bc5b2a4d24c112c4",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {},
+      "registered_skills": {
+        "copilot": [
+          "speckit-implement"
+        ]
+      },
+      "installed_at": "2026-11-20T00:23:53.349028+00:00"
+    }
+  }
+}

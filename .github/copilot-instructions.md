@@ -2,12 +2,31 @@
 
 Este repositorio contiene un backend en Java/Spring en `backend/` y un frontend en React en `frontend/`.
 
+## Constitución
+
+- La constitución del proyecto está en `.specify/memory/constitution.md`. Léela y respétala en toda conversación, aunque no se use un comando de Spec Kit.
+- Es la fuente única de verdad: ante cualquier conflicto con estas instrucciones, prevalece la constitución.
+- Antes de proponer o escribir código, verifica que la propuesta cumple la constitución. Si una petición la contradice, adviértelo en lugar de ejecutarla en silencio.
+- No edites `.specify/memory/constitution.md` salvo con la skill `speckit-constitution`.
+
+## Flujo SDD con Spec Kit
+
+Toda funcionalidad nueva sigue este orden, con las skills de `.github/skills/speckit-*`:
+
+1. `/speckit-specify`: qué se construye y por qué (genera `specs/NNN-nombre/spec.md`).
+2. `/speckit-clarify` (opcional): resuelve las ambigüedades de la spec.
+3. `/speckit-plan`: cómo se construye (genera `plan.md`, `research.md`, `data-model.md`, `contracts/` y `quickstart.md`).
+4. `/speckit-tasks`: tareas ordenadas, con la prueba antes de la implementación (genera `tasks.md`).
+5. `/speckit-analyze` (opcional): consistencia entre spec, plan y tareas.
+6. `/speckit-implement`: actúa como orquestador y delega en `backend-implementer`, `frontend-implementer`, `quality-reviewer` y `spec-auditor`.
+7. `/speckit-converge`: comprueba que el código cumple la spec; lo ejecuta `spec-auditor`.
+
 ## Arnés de Copilot
 
 - Lee `README.md` para ver el mapa de agentes, skills, specs y controles de calidad.
 - Los agentes del espacio de trabajo están en `.github/agents/`; su lista de herramientas permitidas define qué herramientas tiene cada rol.
 - Reutiliza una skill de `.github/skills/` cuando su descripción coincida con la tarea. Las reglas de los servicios del backend las cubre `spring-service-testing`; el trabajo accesible en React, `react-accessible-flows`; y los flujos de envío y revisión de solicitudes de adopción, `adoption-flow-validation`.
-- Las cinco funcionalidades usan la estructura `specs/NN-*/spec.md`, `plan.md` y `tasks.md` del repositorio. No se usa Spec Kit.
+- Las specs viven en `specs/NNN-nombre/`. Las specs 001 a 005 se escribieron antes de instalar Spec Kit; desde la 006 se generan con el flujo SDD de Spec Kit.
 
 ## Reglas de ingeniería
 
