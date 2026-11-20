@@ -50,12 +50,12 @@ test('un adoptante busca una mascota, postula y conserva su historial', async ({
     );
 
     await page.getByRole('button', { name: /Mis Postulaciones/ }).click();
-    await expect(page.getByRole('cell', { name: petName })).toBeVisible();
+    await expect(page.getByRole('cell', { name: petName, exact: true })).toBeVisible();
     await expect(page.getByRole('cell', { name: 'PENDIENTE' })).toBeVisible();
 
     await page.reload();
     await page.getByRole('button', { name: /Mis Postulaciones/ }).click();
-    await expect(page.getByRole('cell', { name: petName })).toBeVisible();
+    await expect(page.getByRole('cell', { name: petName, exact: true })).toBeVisible();
 
     const historyResponse = await request.get(`${API_BASE_URL}/solicitudes/usuario/${user.id}`);
     expect(await historyResponse.json()).toEqual([

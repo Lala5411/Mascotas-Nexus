@@ -81,3 +81,15 @@ Auditoría de convergencia (`/speckit-converge`, rol `spec-auditor`) del 2026-11
 Verificación: `.\mvnw.cmd verify` 45 pruebas y umbrales de JaCoCo cumplidos; `npm test -- --watchAll=false --coverage` 18 pruebas (67,23 % de sentencias); `npm run build` correcto.
 
 **Resultado**: converged. No se añaden tareas.
+
+## Phase 6: Convergence (vuelta 2)
+
+Hallazgo posterior, detectado al ejecutar `npm run test:e2e` durante la spec 010: en
+`frontend/e2e/adoption-flow.spec.js`, `getByRole('cell', { name: petName })` encontró dos celdas,
+porque el botón «Cancelar solicitud de <mascota>» de esta spec también contiene el nombre de la
+mascota y Playwright compara nombres por coincidencia parcial. El componente cumple FR-008; la prueba
+era imprecisa.
+
+- [X] T012 [US3] Usar `exact: true` en los dos selectores de celda por nombre de mascota de `frontend/e2e/adoption-flow.spec.js`
+
+**Resultado**: converged tras la corrección.
