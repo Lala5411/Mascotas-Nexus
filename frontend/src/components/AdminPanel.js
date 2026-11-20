@@ -12,6 +12,7 @@ function AdminPanel() {
   const [edad, setEdad] = useState('');
   const [archivoImagen, setArchivoImagen] = useState(null);
   const [cargandoImagen, setCargandoImagen] = useState(false);
+  const [errorRegistro, setErrorRegistro] = useState('');
 
   const nombreUsuario = localStorage.getItem('nombre');
 
@@ -54,14 +55,22 @@ function AdminPanel() {
     }
 
     // Guardar la mascota con la URL generada por el backend
-    await axios.post(`${API_BASE_URL}/mascotas`, {
-      nombre,
-      especie,
-      edad: parseInt(edad),
-      estado: 'DISPONIBLE',
-      imagenUrl: urlFinal
-    });
+    try {
+      await axios.post(`${API_BASE_URL}/mascotas`, {
+        nombre,
+        especie,
+        edad: parseInt(edad),
+        estado: 'DISPONIBLE',
+        imagenUrl: urlFinal
+      });
+    } catch (error) {
+      setErrorRegistro(error.response?.status === 400
+        ? 'No se pudo registrar la mascota. Revisa que el nombre tenga entre 1 y 60 caracteres, la especie no esté vacía y la edad sea un número entero entre 0 y 30.'
+        : 'No se pudo registrar la mascota. Inténtalo de nuevo.');
+      return;
+    }
 
+    setErrorRegistro('');
     setNombre('');
     setEdad('');
     setArchivoImagen(null);
@@ -112,16 +121,19 @@ function AdminPanel() {
         <section className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
           <h3 className="text-lg font-bold text-slate-800 mb-4">Agregar Nueva Mascota</h3>
           <form onSubmit={agregarMascota} className="grid grid-cols-1 sm:grid-cols-5 gap-4 items-center">
-            <input 
-              type="text" 
-              placeholder="Nombre" 
-              value={nombre} 
+            <input
+              type="text"
+              placeholder="Nombre"
+              aria-label="Nombre de la mascota"
+              maxLength={60}
+              value={nombre}
               onChange={(e) => setNombre(e.target.value)} 
               required 
               className="border border-slate-300 rounded-xl p-2.5 text-sm"
             />
-            <select 
-              value={especie} 
+            <select
+              aria-label="Especie de la mascota"
+              value={especie}
               onChange={(e) => setEspecie(e.target.value)} 
               className="border border-slate-300 rounded-xl p-2.5 text-sm">
               <option value="Perro">Perro</option>
@@ -129,9 +141,10 @@ function AdminPanel() {
               <option value="Otro">Otro</option>
             </select>
             <input 
-              type="number" 
-              placeholder="Edad" 
-              value={edad} 
+              type="number"
+              placeholder="Edad"
+              aria-label="Edad de la mascota"
+              value={edad}
               onChange={(e) => setEdad(e.target.value)} 
               required 
               className="border border-slate-300 rounded-xl p-2.5 text-sm"
@@ -150,6 +163,11 @@ function AdminPanel() {
               {cargandoImagen ? 'Subiendo...' : 'Guardar Mascota'}
             </button>
           </form>
+          {errorRegistro && (
+            <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800" role="alert">
+              {errorRegistro}
+            </p>
+          )}
         </section>
 
         {/* Bandeja de Solicitudes */}
