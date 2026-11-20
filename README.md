@@ -92,15 +92,19 @@ Estas cinco specs se escribieron a mano con la estructura propia `spec → plan 
 
 ### Specs 006 a 010 (flujo SDD con Spec Kit)
 
-Estas specs se desarrollan de principio a fin con el flujo SDD de Spec Kit y los agentes del arnés. Cada una tiene, en su carpeta, `spec.md`, `checklists/`, `plan.md`, `research.md`, `data-model.md`, `contracts/`, `quickstart.md` y `tasks.md`.
+Estas specs se desarrollaron de principio a fin con el flujo SDD de Spec Kit: `specify` → `clarify` → `plan` → `tasks` → `analyze` → `implement` → `converge`. Cada una tiene, en su carpeta, `spec.md` (con la sección *Clarifications*), `checklists/requirements.md`, `plan.md` (con el *Constitution Check*), `research.md`, `data-model.md`, `contracts/`, `quickstart.md` y `tasks.md` (con las tareas marcadas y la tabla de convergencia requisito → prueba). En cada tarea, la prueba se escribió y se vio fallar antes del código (Red → Green).
 
-| Spec | Funcionalidad | Estado | Pull request |
+**Quién ejecutó el flujo:** los comandos de estas cinco specs y la constitución los ejecutó Claude Code siguiendo las skills `speckit-*` y los roles de agentes del arnés, no Copilot; los commits lo indican con `Co-Authored-By`. El arnés de Copilot queda listo para usarlo igual en las próximas specs.
+
+| Spec | Funcionalidad | Pruebas nuevas | Hallazgos registrados en `tasks.md` |
 |---|---|---|---|
-| `specs/006-…` | El adoptante cancela una solicitud pendiente. | Pendiente | — |
-| `specs/007-…` | Validación del registro de mascotas. | Pendiente | — |
-| `specs/008-…` | Resumen de solicitudes por estado para el administrador. | Pendiente | — |
-| `specs/009-…` | Ordenar el catálogo por nombre o edad. | Pendiente | — |
-| `specs/010-…` | Impedir eliminar una mascota con solicitudes pendientes. | Pendiente | — |
+| [`specs/006-cancelar-solicitud/`](./specs/006-cancelar-solicitud/) | El adoptante cancela una solicitud pendiente. | 6 de servicio, 3 HTTP y 3 de interfaz | La E2E del adoptante se volvió ambigua por el nuevo botón; se corrigió el selector (vuelta 2 de convergencia). |
+| [`specs/007-validar-registro-mascota/`](./specs/007-validar-registro-mascota/) | Validación del registro de mascotas. | 10 de servicio, 2 HTTP y 2 de interfaz | Spring no expone el texto del error al navegador; el panel muestra las reglas. |
+| [`specs/008-resumen-solicitudes/`](./specs/008-resumen-solicitudes/) | Resumen de solicitudes por estado para el administrador. | 2 de servicio, 1 HTTP y 3 de interfaz | Un aviso de ESLint por caché local; con `CI=true` el build compila limpio. |
+| [`specs/009-ordenar-catalogo/`](./specs/009-ordenar-catalogo/) | Ordenar el catálogo por nombre o edad. | 3 de interfaz | Ninguno. |
+| [`specs/010-proteger-eliminacion-mascota/`](./specs/010-proteger-eliminacion-mascota/) | Impedir eliminar una mascota con solicitudes. | 4 de servicio, 2 HTTP y 2 de interfaz | Eliminar una mascota con cualquier solicitud ya fallaba con 500 por la clave foránea; ahora responde 409. Una prueba mal escrita se corrigió. |
+
+Resultado tras la spec 010: backend 66 pruebas con los umbrales de JaCoCo cumplidos, frontend 28 pruebas (82,66 % de sentencias, antes 65,71 %), `CI=true npm run build` correcto y 3/3 pruebas E2E.
 
 ## Mecanismos de calidad
 
