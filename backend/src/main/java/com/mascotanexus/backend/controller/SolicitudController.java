@@ -1,5 +1,6 @@
 package com.mascotanexus.backend.controller;
 
+import com.mascotanexus.backend.dto.ResumenSolicitudesResponse;
 import com.mascotanexus.backend.dto.SolicitudResponse;
 import com.mascotanexus.backend.model.Solicitud;
 import com.mascotanexus.backend.service.SolicitudService;
@@ -27,6 +28,11 @@ public class SolicitudController {
     @GetMapping
     public ResponseEntity<List<Solicitud>> listarSolicitudes() {
         return ResponseEntity.ok(solicitudService.listarTodas());
+    }
+
+    @GetMapping("/resumen")
+    public ResponseEntity<ResumenSolicitudesResponse> resumenSolicitudes() {
+        return ResponseEntity.ok(solicitudService.resumenPorEstado());
     }
 
     @GetMapping("/usuario/{usuarioId}")

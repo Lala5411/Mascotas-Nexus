@@ -1,5 +1,6 @@
 package com.mascotanexus.backend.service;
 
+import com.mascotanexus.backend.dto.ResumenSolicitudesResponse;
 import com.mascotanexus.backend.dto.SolicitudResponse;
 import com.mascotanexus.backend.model.Mascota;
 import com.mascotanexus.backend.model.Solicitud;
@@ -104,6 +105,17 @@ public class SolicitudService {
         return solicitudRepository.findByUsuarioId(usuarioId).stream()
                 .map(SolicitudResponse::from)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public ResumenSolicitudesResponse resumenPorEstado() {
+        long pendientes = solicitudRepository.countByEstado(PENDIENTE);
+        long aprobadas = solicitudRepository.countByEstado(APROBADA);
+        long rechazadas = solicitudRepository.countByEstado(RECHAZADA);
+        long canceladas = solicitudRepository.countByEstado(CANCELADA);
+        return new ResumenSolicitudesResponse(
+                pendientes, aprobadas, rechazadas, canceladas,
+                pendientes + aprobadas + rechazadas + canceladas);
     }
 
     @Transactional

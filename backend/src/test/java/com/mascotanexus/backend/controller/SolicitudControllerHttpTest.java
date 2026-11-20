@@ -125,6 +125,22 @@ class SolicitudControllerHttpTest {
                 .andExpect(status().isConflict());
     }
 
+    @Test
+    void resumenDevuelveElConteoPorEstado() throws Exception {
+        when(solicitudRepository.countByEstado("PENDIENTE")).thenReturn(3L);
+        when(solicitudRepository.countByEstado("APROBADA")).thenReturn(1L);
+        when(solicitudRepository.countByEstado("RECHAZADA")).thenReturn(2L);
+        when(solicitudRepository.countByEstado("CANCELADA")).thenReturn(0L);
+
+        mockMvc.perform(get("/api/solicitudes/resumen"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.pendientes").value(3))
+                .andExpect(jsonPath("$.aprobadas").value(1))
+                .andExpect(jsonPath("$.rechazadas").value(2))
+                .andExpect(jsonPath("$.canceladas").value(0))
+                .andExpect(jsonPath("$.total").value(6));
+    }
+
     private Solicitud solicitudPendienteDelUsuario3() {
         Usuario usuario = new Usuario(3L, "Adoptante", "adoptante@example.com", "hash", "ROLE_USER");
         Mascota mascota = new Mascota(7L, "Luna", "Gato", 2, "DISPONIBLE", null);

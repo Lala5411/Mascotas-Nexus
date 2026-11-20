@@ -13,13 +13,26 @@ function AdminPanel() {
   const [archivoImagen, setArchivoImagen] = useState(null);
   const [cargandoImagen, setCargandoImagen] = useState(false);
   const [errorRegistro, setErrorRegistro] = useState('');
+  const [resumen, setResumen] = useState(null);
+  const [errorResumen, setErrorResumen] = useState('');
 
   const nombreUsuario = localStorage.getItem('nombre');
 
   useEffect(() => {
     cargarMascotas();
     cargarSolicitudes();
+    cargarResumen();
   }, []);
+
+  const cargarResumen = async () => {
+    try {
+      const res = await axios.get(`${API_BASE_URL}/solicitudes/resumen`);
+      setResumen(res.data);
+      setErrorResumen('');
+    } catch (error) {
+      setErrorResumen('No fue posible cargar el resumen de solicitudes.');
+    }
+  };
 
   const cargarMascotas = async () => {
     const res = await axios.get(`${API_BASE_URL}/mascotas`);
@@ -86,6 +99,7 @@ function AdminPanel() {
     await axios.put(`${API_BASE_URL}/solicitudes/${id}/estado?estado=${nuevoEstado}`);
     cargarSolicitudes();
     cargarMascotas();
+    cargarResumen();
   };
 
   const cerrarSesion = () => {
@@ -167,6 +181,26 @@ function AdminPanel() {
             <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800" role="alert">
               {errorRegistro}
             </p>
+          )}
+        </section>
+
+        {/* Resumen de Solicitudes */}
+        <section aria-label="Resumen de solicitudes" className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+          <h3 className="text-lg font-bold text-slate-800 mb-4">📊 Resumen de solicitudes</h3>
+          {errorResumen ? (
+            <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800" role="alert">
+              {errorResumen}
+            </p>
+          ) : !resumen ? (
+            <p className="text-sm text-slate-500" role="status">Cargando resumen...</p>
+          ) : (
+            <ul className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-sm font-semibold text-slate-700">
+              <li className="rounded-xl bg-amber-50 px-4 py-3">{`Pendientes: ${resumen.pendientes}`}</li>
+              <li className="rounded-xl bg-green-50 px-4 py-3">{`Aprobadas: ${resumen.aprobadas}`}</li>
+              <li className="rounded-xl bg-red-50 px-4 py-3">{`Rechazadas: ${resumen.rechazadas}`}</li>
+              <li className="rounded-xl bg-slate-100 px-4 py-3">{`Canceladas: ${resumen.canceladas}`}</li>
+              <li className="rounded-xl bg-emerald-50 px-4 py-3">{`Total: ${resumen.total}`}</li>
+            </ul>
           )}
         </section>
 
