@@ -9,7 +9,7 @@ El repositorio está configurado para GitHub Copilot en VS Code y usa [Spec Kit]
 | Pieza | Dónde está | Para qué sirve |
 |---|---|---|
 | Constitución | `.specify/memory/constitution.md` | Principios no negociables del proyecto. Todas las fases de Spec Kit la leen y prevalece sobre cualquier otra instrucción. |
-| Memoria | `.github/copilot-instructions.md`, `backend/AGENTS.md`, `frontend/AGENTS.md` | Lo que Copilot lee al iniciar cada sesión: enlaza la constitución, describe el flujo SDD, las reglas y los comandos. |
+| Memoria | `.github/copilot-instructions.md`, `backend/AGENTS.md`, `frontend/AGENTS.md`, `CLAUDE.md` | Lo que Copilot lee al iniciar cada sesión: enlaza la constitución, describe el flujo SDD, las reglas y los comandos. `CLAUDE.md` hace lo mismo para Claude Code, que ejecutó las specs 006 a 010, importando la constitución y la memoria sin duplicarlas. |
 | Instrucciones por tipo de archivo | `.github/instructions/*.instructions.md` | Reglas que solo se aplican a `backend/**/*.java` o a `frontend/src/**/*.js` (`applyTo`). |
 | Skills de Spec Kit | `.github/skills/speckit-*` | Los comandos del flujo SDD: `/speckit-specify`, `/speckit-clarify`, `/speckit-plan`, `/speckit-tasks`, `/speckit-analyze`, `/speckit-implement`, `/speckit-converge`, `/speckit-checklist` y `/speckit-constitution`. |
 | Skills propias | `.github/skills/` (tabla siguiente) | Procedimientos de Mascota Nexus que los agentes cargan cuando la tarea lo necesita. |
@@ -106,6 +106,8 @@ Estas specs se desarrollaron de principio a fin con el flujo SDD de Spec Kit: `s
 
 Resultado tras la spec 010: backend 66 pruebas con los umbrales de JaCoCo cumplidos, frontend 28 pruebas (82,66 % de sentencias, antes 65,71 %), `CI=true npm run build` correcto y 3/3 pruebas E2E.
 
+Las specs 006 a 010 se integraron en `main` con un único pull request, [#8](https://github.com/Lala5411/Mascotas-Nexus/pull/8): sus ramas estaban encadenadas (cada una partía de la anterior) y el PR se abrió desde la última. Cada spec conserva su rama propia y su commit en el historial de `main`, y el CI del PR #8 pasó en verde.
+
 ## Mecanismos de calidad
 
 El workflow `.github/workflows/quality.yml` ejecuta:
@@ -117,7 +119,9 @@ El workflow `.github/workflows/quality.yml` ejecuta:
 
 Las pruebas backend están en [`backend/src/test/java/`](./backend/src/test/java/) y las pruebas frontend junto a los componentes en [`frontend/src/components/`](./frontend/src/components/). Los informes locales se generan en [`backend/target/site/jacoco/`](./backend/target/site/jacoco/) al ejecutar `.\mvnw.cmd verify` y [`frontend/coverage/`](./frontend/coverage/) al ejecutar Jest con `--coverage`. Son salidas generadas y no están versionadas. El workflow [quality.yml](./.github/workflows/quality.yml) publica esos directorios como artefactos `backend-coverage` y `frontend-coverage`.
 
-El historial de PRs incluye [#1](https://github.com/Lala5411/Mascotas-Nexus/pull/1), [#2](https://github.com/Lala5411/Mascotas-Nexus/pull/2), [#3](https://github.com/Lala5411/Mascotas-Nexus/pull/3), [#4](https://github.com/Lala5411/Mascotas-Nexus/pull/4) y [#5](https://github.com/Lala5411/Mascotas-Nexus/pull/5). Esos enlaces son evidencia de integración; no sustituyen los informes de cobertura o los resultados de CI.
+El historial de PRs incluye [#1](https://github.com/Lala5411/Mascotas-Nexus/pull/1), [#2](https://github.com/Lala5411/Mascotas-Nexus/pull/2), [#3](https://github.com/Lala5411/Mascotas-Nexus/pull/3), [#4](https://github.com/Lala5411/Mascotas-Nexus/pull/4), [#5](https://github.com/Lala5411/Mascotas-Nexus/pull/5) y [#8](https://github.com/Lala5411/Mascotas-Nexus/pull/8). Esos enlaces son evidencia de integración; no sustituyen los informes de cobertura o los resultados de CI.
+
+**Evidencia completa:** las métricas medidas en `main`, el resultado del CI de cada PR, las pruebas que verifican cada spec y las limitaciones reconocidas (entre ellas, la intermitencia del job `end-to-end` en CI) están en [`docs/quality-evidence/README.md`](./docs/quality-evidence/README.md). Los nuevos PR usan la plantilla [`.github/pull_request_template.md`](./.github/pull_request_template.md). El informe técnico completo del proyecto está en [`docs/INFORME_PROYECTO_INTEGRADOR.md`](./docs/INFORME_PROYECTO_INTEGRADOR.md).
 
 ## Cambios respecto del taller
 
