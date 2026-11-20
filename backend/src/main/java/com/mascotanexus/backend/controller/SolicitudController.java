@@ -1,5 +1,6 @@
 package com.mascotanexus.backend.controller;
 
+import com.mascotanexus.backend.dto.ResumenSolicitudesResponse;
 import com.mascotanexus.backend.dto.SolicitudResponse;
 import com.mascotanexus.backend.model.Solicitud;
 import com.mascotanexus.backend.service.SolicitudService;
@@ -29,9 +30,21 @@ public class SolicitudController {
         return ResponseEntity.ok(solicitudService.listarTodas());
     }
 
+    @GetMapping("/resumen")
+    public ResponseEntity<ResumenSolicitudesResponse> resumenSolicitudes() {
+        return ResponseEntity.ok(solicitudService.resumenPorEstado());
+    }
+
     @GetMapping("/usuario/{usuarioId}")
     public ResponseEntity<List<SolicitudResponse>> listarSolicitudesPorUsuario(@PathVariable Long usuarioId) {
         return ResponseEntity.ok(solicitudService.listarPorUsuario(usuarioId));
+    }
+
+    @PutMapping("/{id}/cancelar")
+    public ResponseEntity<SolicitudResponse> cancelarSolicitud(
+            @PathVariable Long id,
+            @RequestParam(required = false) Long usuarioId) {
+        return ResponseEntity.ok(solicitudService.cancelar(id, usuarioId));
     }
 
     @PutMapping("/{id}/estado")

@@ -12,13 +12,28 @@ function AdminPanel() {
   const [edad, setEdad] = useState('');
   const [archivoImagen, setArchivoImagen] = useState(null);
   const [cargandoImagen, setCargandoImagen] = useState(false);
+  const [errorRegistro, setErrorRegistro] = useState('');
+  const [resumen, setResumen] = useState(null);
+  const [errorResumen, setErrorResumen] = useState('');
+  const [errorEliminacion, setErrorEliminacion] = useState('');
 
   const nombreUsuario = localStorage.getItem('nombre');
 
   useEffect(() => {
     cargarMascotas();
     cargarSolicitudes();
+    cargarResumen();
   }, []);
+
+  const cargarResumen = async () => {
+    try {
+      const res = await axios.get(`${API_BASE_URL}/solicitudes/resumen`);
+      setResumen(res.data);
+      setErrorResumen('');
+    } catch (error) {
+      setErrorResumen('No fue posible cargar el resumen de solicitudes.');
+    }
+  };
 
   const cargarMascotas = async () => {
     const res = await axios.get(`${API_BASE_URL}/mascotas`);
@@ -54,22 +69,41 @@ function AdminPanel() {
     }
 
     // Guardar la mascota con la URL generada por el backend
-    await axios.post(`${API_BASE_URL}/mascotas`, {
-      nombre,
-      especie,
-      edad: parseInt(edad),
-      estado: 'DISPONIBLE',
-      imagenUrl: urlFinal
-    });
+    try {
+      await axios.post(`${API_BASE_URL}/mascotas`, {
+        nombre,
+        especie,
+        edad: parseInt(edad),
+        estado: 'DISPONIBLE',
+        imagenUrl: urlFinal
+      });
+    } catch (error) {
+      setErrorRegistro(error.response?.status === 400
+        ? 'No se pudo registrar la mascota. Revisa que el nombre tenga entre 1 y 60 caracteres, la especie no esté vacía y la edad sea un número entero entre 0 y 30.'
+        : 'No se pudo registrar la mascota. Inténtalo de nuevo.');
+      return;
+    }
 
+    setErrorRegistro('');
     setNombre('');
     setEdad('');
     setArchivoImagen(null);
     cargarMascotas();
   };
 
-  const eliminarMascota = async (id) => {
-    await axios.delete(`${API_BASE_URL}/mascotas/${id}`);
+  const eliminarMascota = async (mascota) => {
+    try {
+      await axios.delete(`${API_BASE_URL}/mascotas/${mascota.id}`);
+      setErrorEliminacion('');
+    } catch (error) {
+      if (error.response?.status === 409) {
+        setErrorEliminacion(`No se puede eliminar a ${mascota.nombre} porque tiene solicitudes de adopción asociadas.`);
+        return;
+      }
+      setErrorEliminacion(error.response?.status === 404
+        ? `${mascota.nombre} ya no existe; se actualizó la lista.`
+        : `No se pudo eliminar a ${mascota.nombre}. Inténtalo de nuevo.`);
+    }
     cargarMascotas();
   };
 
@@ -77,6 +111,7 @@ function AdminPanel() {
     await axios.put(`${API_BASE_URL}/solicitudes/${id}/estado?estado=${nuevoEstado}`);
     cargarSolicitudes();
     cargarMascotas();
+    cargarResumen();
   };
 
   const cerrarSesion = () => {
@@ -112,16 +147,19 @@ function AdminPanel() {
         <section className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
           <h3 className="text-lg font-bold text-slate-800 mb-4">Agregar Nueva Mascota</h3>
           <form onSubmit={agregarMascota} className="grid grid-cols-1 sm:grid-cols-5 gap-4 items-center">
-            <input 
-              type="text" 
-              placeholder="Nombre" 
-              value={nombre} 
+            <input
+              type="text"
+              placeholder="Nombre"
+              aria-label="Nombre de la mascota"
+              maxLength={60}
+              value={nombre}
               onChange={(e) => setNombre(e.target.value)} 
               required 
               className="border border-slate-300 rounded-xl p-2.5 text-sm"
             />
-            <select 
-              value={especie} 
+            <select
+              aria-label="Especie de la mascota"
+              value={especie}
               onChange={(e) => setEspecie(e.target.value)} 
               className="border border-slate-300 rounded-xl p-2.5 text-sm">
               <option value="Perro">Perro</option>
@@ -129,9 +167,10 @@ function AdminPanel() {
               <option value="Otro">Otro</option>
             </select>
             <input 
-              type="number" 
-              placeholder="Edad" 
-              value={edad} 
+              type="number"
+              placeholder="Edad"
+              aria-label="Edad de la mascota"
+              value={edad}
               onChange={(e) => setEdad(e.target.value)} 
               required 
               className="border border-slate-300 rounded-xl p-2.5 text-sm"
@@ -150,6 +189,31 @@ function AdminPanel() {
               {cargandoImagen ? 'Subiendo...' : 'Guardar Mascota'}
             </button>
           </form>
+          {errorRegistro && (
+            <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800" role="alert">
+              {errorRegistro}
+            </p>
+          )}
+        </section>
+
+        {/* Resumen de Solicitudes */}
+        <section aria-label="Resumen de solicitudes" className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+          <h3 className="text-lg font-bold text-slate-800 mb-4">📊 Resumen de solicitudes</h3>
+          {errorResumen ? (
+            <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800" role="alert">
+              {errorResumen}
+            </p>
+          ) : !resumen ? (
+            <p className="text-sm text-slate-500" role="status">Cargando resumen...</p>
+          ) : (
+            <ul className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-sm font-semibold text-slate-700">
+              <li className="rounded-xl bg-amber-50 px-4 py-3">{`Pendientes: ${resumen.pendientes}`}</li>
+              <li className="rounded-xl bg-green-50 px-4 py-3">{`Aprobadas: ${resumen.aprobadas}`}</li>
+              <li className="rounded-xl bg-red-50 px-4 py-3">{`Rechazadas: ${resumen.rechazadas}`}</li>
+              <li className="rounded-xl bg-slate-100 px-4 py-3">{`Canceladas: ${resumen.canceladas}`}</li>
+              <li className="rounded-xl bg-emerald-50 px-4 py-3">{`Total: ${resumen.total}`}</li>
+            </ul>
+          )}
         </section>
 
         {/* Bandeja de Solicitudes */}
@@ -209,6 +273,11 @@ function AdminPanel() {
         {/* Inventario de Mascotas */}
         <section className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
           <h3 className="text-lg font-bold text-slate-800 mb-4">📋 Inventario General</h3>
+          {errorEliminacion && (
+            <p className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800" role="alert">
+              {errorEliminacion}
+            </p>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {mascotas.map((m) => (
               <div key={m.id} className="border border-slate-200 rounded-xl p-4 flex items-center space-x-4">
@@ -222,7 +291,7 @@ function AdminPanel() {
                     {m.estado}
                   </span>
                 </div>
-                <button onClick={() => eliminarMascota(m.id)} className="text-xs font-semibold text-red-600 hover:text-red-800">
+                <button onClick={() => eliminarMascota(m)} className="text-xs font-semibold text-red-600 hover:text-red-800">
                   Eliminar
                 </button>
               </div>

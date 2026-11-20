@@ -4,7 +4,21 @@ Aplicación de adopción con backend Java 17 / Spring Boot en `backend/`, fronte
 
 ## Arnés de Copilot
 
-El repositorio está configurado para GitHub Copilot en VS Code. La memoria y las convenciones generales están en `.github/copilot-instructions.md`; los agentes están en `.github/agents/` y las skills del workspace en `.github/skills/`. Los módulos también conservan instrucciones y skills complementarias en `backend/.github/` y `frontend/.github/`.
+El repositorio está configurado para GitHub Copilot en VS Code y usa [Spec Kit](https://github.com/github/spec-kit) (CLI `specify` 1.4.3, integración `copilot`, scripts PowerShell) para el desarrollo guiado por especificaciones.
+
+| Pieza | Dónde está | Para qué sirve |
+|---|---|---|
+| Constitución | `.specify/memory/constitution.md` | Principios no negociables del proyecto. Todas las fases de Spec Kit la leen y prevalece sobre cualquier otra instrucción. |
+| Memoria | `.github/copilot-instructions.md`, `backend/AGENTS.md`, `frontend/AGENTS.md` | Lo que Copilot lee al iniciar cada sesión: enlaza la constitución, describe el flujo SDD, las reglas y los comandos. |
+| Instrucciones por tipo de archivo | `.github/instructions/*.instructions.md` | Reglas que solo se aplican a `backend/**/*.java` o a `frontend/src/**/*.js` (`applyTo`). |
+| Skills de Spec Kit | `.github/skills/speckit-*` | Los comandos del flujo SDD: `/speckit-specify`, `/speckit-clarify`, `/speckit-plan`, `/speckit-tasks`, `/speckit-analyze`, `/speckit-implement`, `/speckit-converge`, `/speckit-checklist` y `/speckit-constitution`. |
+| Skills propias | `.github/skills/` (tabla siguiente) | Procedimientos de Mascota Nexus que los agentes cargan cuando la tarea lo necesita. |
+| Agentes | `.github/agents/*.agent.md` | Roles con modelo, herramientas y skills propios, a los que delega `/speckit-implement`. |
+| Preset de Spec Kit | `speckit-custom/presets/implement-orquestador/` | Convierte `/speckit-implement` en un orquestador que no escribe código y delega cada tarea en un agente. |
+| Plantillas, scripts y workflow de Spec Kit | `.specify/templates/`, `.specify/scripts/powershell/`, `.specify/workflows/` | Generan la estructura de cada spec (`specs/NNN-nombre/`). |
+| Calidad | `.github/workflows/quality.yml` | Pruebas, cobertura con umbral y E2E en cada pull request. |
+
+Los módulos también conservan instrucciones y skills complementarias en `backend/.github/` y `frontend/.github/`.
 
 ### Skills y asignación a agentes
 
@@ -25,48 +39,72 @@ La asignación de skills a agentes está declarada en el campo `skills:` de cada
 | `backend-implementer` | Implementar y probar backend respetando controller/service/repository. | `GPT-4.1` | `read`, `search`, `edit`, `execute` |
 | `frontend-implementer` | Implementar flujos React accesibles, API y pruebas de interacción. | `GPT-4.1` | `read`, `search`, `edit`, `execute` |
 | `quality-reviewer` | Revisar ambos módulos y ejecutar verificaciones sin herramienta de edición de archivos. | `GPT-4.1` | `read`, `search`, `execute` |
+| `spec-auditor` | Ejecutar `/speckit-converge` al terminar la implementación y añadir a `tasks.md` lo que falte. | `GPT-4.1` | `read`, `search`, `edit`, `execute` |
 
 Las listas de herramientas limitan las herramientas disponibles para cada agente; el agente de calidad no tiene la herramienta `edit`. La ejecución de comandos no equivale a un aislamiento del sistema operativo.
 
-La separación de roles corresponde a los dos módulos de la aplicación y a una revisión transversal: cada implementador trabaja en su módulo y el revisor verifica la integración. Los pull requests y CI sirven como controles de integración, sin añadir un coordinador para este conjunto acotado de funcionalidades.
+Dentro de `/speckit-implement`, el orquestador delega cada bloque de tareas en el agente de su módulo, pide la revisión a `quality-reviewer` en cada historia y la convergencia a `spec-auditor` al final. Los agentes no se invocan entre sí y responden con un informe fijo (`ESTADO`, `TAREAS`, `ARCHIVOS`, `EVIDENCIA`, `NECESITA DE OTRO AGENTE`, `PREGUNTAS PARA LA DESARROLLADORA`).
 
 ### Cómo se usa el arnés
 
-1. **Spec → plan → tasks:** crea o actualiza `specs/NN-nombre/spec.md`, `plan.md` y `tasks.md`, revisando los requisitos y las pruebas existentes. No hay un comando ni un agente dedicado a generar estos tres archivos: son artefactos Markdown del repositorio.
+Cada funcionalidad nueva sigue el flujo SDD de Spec Kit, de principio a fin, en Copilot Chat (modo agente). Los comandos se ejecutan de uno en uno y se revisa el resultado de cada uno antes del siguiente.
+
+```mermaid
+flowchart LR
+    A["/speckit-specify"] --> B["/speckit-clarify"]
+    B --> C["/speckit-plan"]
+    C --> D["/speckit-tasks"]
+    D --> E["/speckit-analyze"]
+    E --> F["/speckit-implement<br/>(orquestador)"]
+    F --> G["/speckit-converge<br/>(spec-auditor)"]
+    G -- "quedan tareas" --> F
+    G -- "converged" --> H["PR + CI"]
+```
+
+1. **Rama:** `git switch -c NNN-nombre-corto` desde `main` actualizado.
+2. **`/speckit-specify <descripción>`:** genera `specs/NNN-nombre/spec.md` (historias de usuario, requisitos y criterios de aceptación) y `checklists/requirements.md`.
+3. **`/speckit-clarify`:** resuelve las ambigüedades de la spec con preguntas.
+4. **`/speckit-plan Sigue la constitución; no introduzcas tecnologías nuevas.`:** genera `plan.md` (con el *Constitution Check*), `research.md`, `data-model.md`, `contracts/` y `quickstart.md`.
+5. **`/speckit-tasks`:** genera `tasks.md`, con la tarea de prueba antes de la de implementación.
+6. **`/speckit-analyze`:** comprueba la consistencia entre spec, plan y tareas.
+7. **`/speckit-implement`:** el orquestador delega en `backend-implementer` y `frontend-implementer` (Red → Green), revisa con `quality-reviewer` y termina con `spec-auditor`.
+8. **`/speckit-converge`:** si el orquestador no lo ejecutó, compruébalo a mano; debe terminar en `converged`.
+9. **Pull request:** Conventional Commits, push de la rama y PR hacia `main`; el CI (`quality.yml`) debe quedar en verde antes de fusionar.
    ```powershell
-   Get-Content .\specs\NN-nombre\spec.md, .\specs\NN-nombre\plan.md, .\specs\NN-nombre\tasks.md
-   ```
-2. **Implementación por módulo:** en Copilot Chat selecciona `backend-implementer` o `frontend-implementer`, según los archivos implicados, y proporciona los requisitos y la spec. Ejecuta las verificaciones del módulo:
-   ```powershell
-   Set-Location backend; .\mvnw.cmd verify
-   Set-Location ..\frontend; npm test -- --watchAll=false --coverage; npm run build
-   ```
-3. **Revisión:** selecciona `quality-reviewer` en Copilot Chat y solicita revisión del diff y ejecución de las verificaciones relevantes. Para una revisión transversal:
-   ```powershell
-   Set-Location backend; .\mvnw.cmd verify
-   Set-Location ..\frontend; npm test -- --watchAll=false --coverage; npm run build
-   ```
-4. **Pull request:** crea una rama descriptiva, confirma solo los cambios revisados con Conventional Commits, súbela y abre un PR hacia `main`:
-   ```powershell
-   git switch -c feat/nombre-de-la-funcionalidad
-   git add <archivos-revisados>
+   git add specs/NNN-nombre backend frontend
    git commit -m "feat: describe la funcionalidad"
-   git push -u origin feat/nombre-de-la-funcionalidad
+   git push -u origin NNN-nombre-corto
    ```
-   La creación del PR se realiza en GitHub; no hay un comando de PR configurado en el repositorio.
-5. **CI:** al abrir o actualizar el PR, GitHub ejecuta automáticamente el workflow de calidad. Confirma los jobs y descarga sus artefactos de cobertura antes de fusionar.
 
 ## Desarrollo guiado por especificaciones
 
-Se usa la estructura propia `spec → plan → tasks → implementación/pruebas`; no se usa Spec Kit. Las cinco funcionalidades tienen especificación, plan y tareas completadas en `specs/`:
+### Specs 001 a 005 (antes de Spec Kit)
+
+Estas cinco specs se escribieron a mano con la estructura propia `spec → plan → tasks`, antes de instalar Spec Kit. Sus carpetas se renombraron de `NN-` a `NNN-` para que la numeración de Spec Kit continúe en la 006.
 
 | Spec | Funcionalidad | Pull request fusionado |
 |---|---|---|
-| `specs/01-filtrado-mascotas/` | Filtrar mascotas disponibles por especie y edad máxima. | [#1](https://github.com/Lala5411/Mascotas-Nexus/pull/1) |
-| `specs/02-busqueda-catalogo/` | Buscar y filtrar en el catálogo. | [#2](https://github.com/Lala5411/Mascotas-Nexus/pull/2) |
-| `specs/03-historial-solicitudes/` | Guardar y consultar postulaciones del usuario. | [#3](https://github.com/Lala5411/Mascotas-Nexus/pull/3) |
-| `specs/04-validacion-solicitudes/` | Validar postulaciones e invariantes de adopción. | [#4](https://github.com/Lala5411/Mascotas-Nexus/pull/4) |
-| `specs/05-transiciones-solicitudes/` | Aprobar o rechazar solicitudes pendientes de forma segura. | [#5](https://github.com/Lala5411/Mascotas-Nexus/pull/5) |
+| `specs/001-filtrado-mascotas/` | Filtrar mascotas disponibles por especie y edad máxima. | [#1](https://github.com/Lala5411/Mascotas-Nexus/pull/1) |
+| `specs/002-busqueda-catalogo/` | Buscar y filtrar en el catálogo. | [#2](https://github.com/Lala5411/Mascotas-Nexus/pull/2) |
+| `specs/003-historial-solicitudes/` | Guardar y consultar postulaciones del usuario. | [#3](https://github.com/Lala5411/Mascotas-Nexus/pull/3) |
+| `specs/004-validacion-solicitudes/` | Validar postulaciones e invariantes de adopción. | [#4](https://github.com/Lala5411/Mascotas-Nexus/pull/4) |
+| `specs/005-transiciones-solicitudes/` | Aprobar o rechazar solicitudes pendientes de forma segura. | [#5](https://github.com/Lala5411/Mascotas-Nexus/pull/5) |
+
+### Specs 006 a 010 (flujo SDD con Spec Kit)
+
+Estas specs se desarrollaron de principio a fin con el flujo SDD de Spec Kit: `specify` → `clarify` → `plan` → `tasks` → `analyze` → `implement` → `converge`. Cada una tiene, en su carpeta, `spec.md` (con la sección *Clarifications*), `checklists/requirements.md`, `plan.md` (con el *Constitution Check*), `research.md`, `data-model.md`, `contracts/`, `quickstart.md` y `tasks.md` (con las tareas marcadas y la tabla de convergencia requisito → prueba). En cada tarea, la prueba se escribió y se vio fallar antes del código (Red → Green).
+
+**Quién ejecutó el flujo:** los comandos de estas cinco specs y la constitución los ejecutó Claude Code siguiendo las skills `speckit-*` y los roles de agentes del arnés, no Copilot; los commits lo indican con `Co-Authored-By`. El arnés de Copilot queda listo para usarlo igual en las próximas specs.
+
+| Spec | Funcionalidad | Pruebas nuevas | Hallazgos registrados en `tasks.md` |
+|---|---|---|---|
+| [`specs/006-cancelar-solicitud/`](./specs/006-cancelar-solicitud/) | El adoptante cancela una solicitud pendiente. | 6 de servicio, 3 HTTP y 3 de interfaz | La E2E del adoptante se volvió ambigua por el nuevo botón; se corrigió el selector (vuelta 2 de convergencia). |
+| [`specs/007-validar-registro-mascota/`](./specs/007-validar-registro-mascota/) | Validación del registro de mascotas. | 10 de servicio, 2 HTTP y 2 de interfaz | Spring no expone el texto del error al navegador; el panel muestra las reglas. |
+| [`specs/008-resumen-solicitudes/`](./specs/008-resumen-solicitudes/) | Resumen de solicitudes por estado para el administrador. | 2 de servicio, 1 HTTP y 3 de interfaz | Un aviso de ESLint por caché local; con `CI=true` el build compila limpio. |
+| [`specs/009-ordenar-catalogo/`](./specs/009-ordenar-catalogo/) | Ordenar el catálogo por nombre o edad. | 3 de interfaz | Ninguno. |
+| [`specs/010-proteger-eliminacion-mascota/`](./specs/010-proteger-eliminacion-mascota/) | Impedir eliminar una mascota con solicitudes. | 4 de servicio, 2 HTTP y 2 de interfaz | Eliminar una mascota con cualquier solicitud ya fallaba con 500 por la clave foránea; ahora responde 409. Una prueba mal escrita se corrigió. |
+
+Resultado tras la spec 010: backend 66 pruebas con los umbrales de JaCoCo cumplidos, frontend 28 pruebas (82,66 % de sentencias, antes 65,71 %), `CI=true npm run build` correcto y 3/3 pruebas E2E.
 
 ## Mecanismos de calidad
 
@@ -77,13 +115,13 @@ El workflow `.github/workflows/quality.yml` ejecuta:
 - Pruebas de extremo a extremo con Playwright (`frontend/e2e/`, configuración en `frontend/playwright.config.js`) contra una base PostgreSQL aislada `mascota_nexus_e2e`; se ejecutan localmente con `npm run test:e2e` desde `frontend/`.
 - Artefactos de cobertura de backend y frontend, y el informe `playwright-report`, retenidos durante siete días en las ejecuciones de CI.
 
-Las pruebas backend están en [`backend/src/test/java/`](./backend/src/test/java/) y las pruebas frontend junto a los componentes en [`frontend/src/components/`](./frontend/src/components/). Los informes locales se generan en [`backend/target/site/jacoco/`](./backend/target/site/jacoco/) al ejecutar `.\mvnw.cmd verify` y [`frontend/coverage/`](./frontend/coverage/) al ejecutar Jest con `--coverage`. Son salidas generadas y no están versionadas. El workflow [quality.yml](./.github/workflows/quality.yml) publica esos directorios como artefactos `backend-coverage` y `frontend-coverage`; esta rama no tiene todavía una ejecución de CI ni artefactos remotos.
+Las pruebas backend están en [`backend/src/test/java/`](./backend/src/test/java/) y las pruebas frontend junto a los componentes en [`frontend/src/components/`](./frontend/src/components/). Los informes locales se generan en [`backend/target/site/jacoco/`](./backend/target/site/jacoco/) al ejecutar `.\mvnw.cmd verify` y [`frontend/coverage/`](./frontend/coverage/) al ejecutar Jest con `--coverage`. Son salidas generadas y no están versionadas. El workflow [quality.yml](./.github/workflows/quality.yml) publica esos directorios como artefactos `backend-coverage` y `frontend-coverage`.
 
 El historial de PRs incluye [#1](https://github.com/Lala5411/Mascotas-Nexus/pull/1), [#2](https://github.com/Lala5411/Mascotas-Nexus/pull/2), [#3](https://github.com/Lala5411/Mascotas-Nexus/pull/3), [#4](https://github.com/Lala5411/Mascotas-Nexus/pull/4) y [#5](https://github.com/Lala5411/Mascotas-Nexus/pull/5). Esos enlaces son evidencia de integración; no sustituyen los informes de cobertura o los resultados de CI.
 
 ## Cambios respecto del taller
 
-El diseño de partida es el del *Taller 5: Sistema de agentes*: siete agentes (`orquestador-mascotas`, `auditor-contrato-api`, `backend-test-author`, `backend-implementer`, `frontend-test-author`, `frontend-implementer` y `guardian-calidad`), modelo Copilot Fusion y mutation testing (PIT y StrykerJS) como puerta de calidad. Lo implementado son los tres agentes de `.github/agents/`. Cada cambio se apoya en lo que muestra el historial de los PR #1 a #6.
+El diseño de partida es el del *Taller 5: Sistema de agentes*: siete agentes (`orquestador-mascotas`, `auditor-contrato-api`, `backend-test-author`, `backend-implementer`, `frontend-test-author`, `frontend-implementer` y `guardian-calidad`), modelo Copilot Fusion y mutation testing (PIT y StrykerJS) como puerta de calidad. Lo implementado son los cuatro agentes de `.github/agents/` más el orquestador como preset de `/speckit-implement`. Cada cambio se apoya en lo que muestra el historial de los PR o en lo que observamos al revisar el proyecto.
 
 | Qué cambió | Qué observamos al ejecutar las specs y por qué |
 |---|---|
@@ -94,6 +132,7 @@ El diseño de partida es el del *Taller 5: Sistema de agentes*: siete agentes (`
 | El mutation testing (PIT y StrykerJS) se reemplazó por umbrales de cobertura medidos (JaCoCo y Jest) y pruebas E2E con Playwright, todo en `quality.yml`. | El taller registraba que no existía ningún workflow de CI. Se priorizó una puerta automática en cada PR: en el PR #3 detectó un fallo de `npm ci` que no se veía en local. Limitación reconocida, igual que en el taller: la cobertura mide ejecución, no la calidad de las aserciones. |
 | Se añadieron skills y la asignación `skills:` en cada agente. | El diseño del taller no tenía skills. Las specs 03 a 05 repitieron el mismo flujo de solicitudes en ambos módulos, y de ahí salió `adoption-flow-validation`. |
 | El modelo pasó de Copilot Fusion (Standard) a `GPT-4.1`. | No fue una decisión de diseño: el agente de Copilot escribió `GPT-4.1` al añadir el campo `model` durante el cierre del proyecto, y lo aceptamos sin evaluarlo contra Copilot Fusion. Lo declaramos como una diferencia no justificada; compararlos queda pendiente. |
+| Se instaló Spec Kit y se recuperó el orquestador del taller como preset de `/speckit-implement`; se añadió `spec-auditor`. | En la revisión del proyecto, el profesor señaló que lo que teníamos no era un arnés porque el flujo SDD no se ejecutaba: las specs 001 a 005 eran Markdown escritos a mano y ningún comando ni agente los generaba. Con Spec Kit el flujo `specify → plan → tasks → implement → converge` es ejecutable, y el orquestador que diseñamos en el taller vuelve como el rol de `/speckit-implement`, delegando en los agentes. `spec-auditor` cumple el papel de verificación que en el taller tenía `auditor-contrato-api`, ahora contra la spec completa. |
 | Los agentes se crearon a partir de la spec 03. | Las specs 01 y 02 se planearon con `/plan` en el chat (`backend/plan-1-grupo8.md`, `frontend/plan-2-grupo8.md`); los archivos `.github/agents/` aparecen por primera vez en el PR #3. |
 
 ## Ejecución local

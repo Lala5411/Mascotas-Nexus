@@ -306,3 +306,134 @@ test('solicita y persiste el perfil del hogar al postular con el usuario autenti
   expect(axios.get).toHaveBeenCalledWith('http://localhost:8080/api/solicitudes/usuario/7');
   alertSpy.mockRestore();
 });
+
+const historialConPendienteYAprobada = [
+  {
+    id: 31,
+    mascotaNombre: 'Luna',
+    mensaje: 'Quiero adoptar',
+    estado: 'PENDIENTE',
+    tipoVivienda: 'CASA',
+    horasLibres: 6,
+    nivelActividad: 'ALTO'
+  },
+  {
+    id: 32,
+    mascotaNombre: 'Rocky',
+    mensaje: 'Tengo patio',
+    estado: 'APROBADA',
+    tipoVivienda: 'CASA',
+    horasLibres: 4,
+    nivelActividad: 'MEDIO'
+  }
+];
+
+const abrirHistorial = async (historial) => {
+  axios.get.mockImplementation((url) => {
+    if (url.endsWith('/mascotas/disponibles')) {
+      return Promise.resolve({ data: mascotasIniciales });
+    }
+    if (url.endsWith('/solicitudes/usuario/7')) {
+      return Promise.resolve({ data: historial });
+    }
+    return Promise.resolve({ data: [] });
+  });
+
+  render(<Catalogo />);
+  await screen.findByText('Rocky');
+  fireEvent.click(screen.getByRole('button', { name: /Mis Postulaciones/ }));
+  await screen.findByText('Quiero adoptar');
+};
+
+test('muestra el botón Cancelar solo en las solicitudes pendientes', async () => {
+  await abrirHistorial(historialConPendienteYAprobada);
+
+  expect(screen.getByRole('button', { name: 'Cancelar solicitud de Luna' })).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Cancelar solicitud de Rocky' })).not.toBeInTheDocument();
+});
+
+test('cancela una solicitud pendiente y muestra el nuevo estado sin recargar', async () => {
+  axios.put.mockResolvedValue({ data: { ...historialConPendienteYAprobada[0], estado: 'CANCELADA' } });
+  await abrirHistorial(historialConPendienteYAprobada);
+  const llamadasGetAntes = axios.get.mock.calls.length;
+
+  fireEvent.click(screen.getByRole('button', { name: 'Cancelar solicitud de Luna' }));
+
+  expect(await screen.findByText('CANCELADA')).toBeInTheDocument();
+  expect(axios.put).toHaveBeenCalledWith(
+    'http://localhost:8080/api/solicitudes/31/cancelar',
+    null,
+    { params: { usuarioId: '7' } }
+  );
+  expect(screen.queryByRole('button', { name: 'Cancelar solicitud de Luna' })).not.toBeInTheDocument();
+  expect(axios.get.mock.calls.length).toBe(llamadasGetAntes);
+});
+
+test('muestra un error si el servidor rechaza la cancelación', async () => {
+  axios.put.mockRejectedValue({ response: { status: 409 } });
+  await abrirHistorial(historialConPendienteYAprobada);
+
+  fireEvent.click(screen.getByRole('button', { name: 'Cancelar solicitud de Luna' }));
+
+  expect(await screen.findByRole('alert')).toHaveTextContent('No fue posible cancelar la solicitud');
+  expect(screen.getByText('PENDIENTE')).toBeInTheDocument();
+});
+
+const nombresEnPantalla = () => screen.getAllByRole('img').map((imagen) => imagen.getAttribute('alt'));
+
+const elegirOrden = (opcion) => {
+  fireEvent.change(screen.getByRole('combobox', { name: 'Ordenar por' }), {
+    target: { value: opcion }
+  });
+};
+
+test('ordena el catálogo por nombre y por edad', async () => {
+  render(<Catalogo />);
+  await screen.findByText('Rocky');
+  expect(screen.getByRole('combobox', { name: 'Ordenar por' })).toHaveDisplayValue('Orden original');
+
+  elegirOrden('nombre-asc');
+  expect(nombresEnPantalla()).toEqual(['Luna', 'Nube', 'Rocky']);
+
+  elegirOrden('edad-asc');
+  expect(nombresEnPantalla()).toEqual(['Nube', 'Luna', 'Rocky']);
+
+  elegirOrden('edad-desc');
+  expect(nombresEnPantalla()).toEqual(['Rocky', 'Luna', 'Nube']);
+});
+
+test('mantiene el orden al buscar y no hace peticiones nuevas', async () => {
+  render(<Catalogo />);
+  await screen.findByText('Rocky');
+  const peticionesAntes = axios.get.mock.calls.length;
+
+  elegirOrden('edad-desc');
+  fireEvent.change(screen.getByRole('searchbox', { name: 'Buscar por nombre' }), {
+    target: { value: 'u' }
+  });
+
+  expect(nombresEnPantalla()).toEqual(['Luna', 'Nube']);
+  expect(axios.get.mock.calls.length).toBe(peticionesAntes);
+});
+
+test('conserva el orden original por defecto y desempata por nombre', async () => {
+  axios.get.mockImplementation((url) => {
+    if (url.endsWith('/mascotas/disponibles')) {
+      return Promise.resolve({
+        data: [
+          { id: 4, nombre: 'Rocky', especie: 'Perro', edad: 4, estado: 'DISPONIBLE' },
+          { id: 5, nombre: 'Luna', especie: 'Gato', edad: 2, estado: 'DISPONIBLE' },
+          { id: 6, nombre: 'Bruno', especie: 'Perro', edad: 2, estado: 'DISPONIBLE' }
+        ]
+      });
+    }
+    return Promise.resolve({ data: [] });
+  });
+  render(<Catalogo />);
+  await screen.findByText('Bruno');
+
+  expect(nombresEnPantalla()).toEqual(['Rocky', 'Luna', 'Bruno']);
+
+  elegirOrden('edad-asc');
+  expect(nombresEnPantalla()).toEqual(['Bruno', 'Luna', 'Rocky']);
+});
