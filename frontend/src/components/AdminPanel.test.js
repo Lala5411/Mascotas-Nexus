@@ -6,7 +6,11 @@ jest.mock('axios');
 
 const resumenInicial = { pendientes: 3, aprobadas: 1, rechazadas: 2, canceladas: 0, total: 6 };
 
-const simularGet = ({ solicitudes = [], resumen = Promise.resolve({ data: resumenInicial }) } = {}) => {
+const simularGet = ({
+  solicitudes = [],
+  mascotas = [],
+  resumen = Promise.resolve({ data: resumenInicial })
+} = {}) => {
   axios.get.mockImplementation((url) => {
     if (url.endsWith('/solicitudes/resumen')) {
       return resumen;
@@ -14,9 +18,17 @@ const simularGet = ({ solicitudes = [], resumen = Promise.resolve({ data: resume
     if (url.endsWith('/solicitudes')) {
       return Promise.resolve({ data: solicitudes });
     }
+    if (url.endsWith('/mascotas')) {
+      return Promise.resolve({ data: mascotas });
+    }
     return Promise.resolve({ data: [] });
   });
 };
+
+const llamadasAMascotas = () => axios.get.mock.calls
+  .filter(([url]) => url.endsWith('/mascotas')).length;
+
+const mascotaLuna = { id: 7, nombre: 'Luna', especie: 'Gato', edad: 2, estado: 'DISPONIBLE' };
 
 const llamadasAlResumen = () => axios.get.mock.calls
   .filter(([url]) => url.endsWith('/solicitudes/resumen')).length;
@@ -110,4 +122,32 @@ test('vuelve a cargar el resumen después de aprobar una solicitud', async () =>
 
   await waitFor(() => expect(llamadasAlResumen()).toBeGreaterThan(llamadasAntes));
   expect(axios.put).toHaveBeenCalledWith('http://localhost:8080/api/solicitudes/41/estado?estado=APROBADA');
+});
+
+test('explica por qué no se pudo eliminar una mascota con solicitudes', async () => {
+  simularGet({ mascotas: [mascotaLuna] });
+  axios.delete.mockRejectedValue({ response: { status: 409 } });
+  render(<AdminPanel />);
+
+  fireEvent.click(await screen.findByRole('button', { name: 'Eliminar' }));
+
+  expect(await screen.findByRole('alert')).toHaveTextContent(
+    'No se puede eliminar a Luna porque tiene solicitudes de adopción asociadas.'
+  );
+  expect(axios.delete).toHaveBeenCalledWith('http://localhost:8080/api/mascotas/7');
+  expect(screen.getByText('Luna')).toBeInTheDocument();
+});
+
+test('recarga la lista sin errores cuando la mascota se elimina', async () => {
+  simularGet({ mascotas: [mascotaLuna] });
+  axios.delete.mockResolvedValue({ status: 204 });
+  render(<AdminPanel />);
+  const botonEliminar = await screen.findByRole('button', { name: 'Eliminar' });
+  const llamadasAntes = llamadasAMascotas();
+
+  fireEvent.click(botonEliminar);
+
+  await waitFor(() => expect(llamadasAMascotas()).toBeGreaterThan(llamadasAntes));
+  expect(axios.delete).toHaveBeenCalledTimes(1);
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 });

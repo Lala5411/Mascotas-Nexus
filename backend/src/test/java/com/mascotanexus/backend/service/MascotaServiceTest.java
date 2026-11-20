@@ -3,6 +3,7 @@ package com.mascotanexus.backend.service;
 import com.mascotanexus.backend.dto.MascotaResponse;
 import com.mascotanexus.backend.model.Mascota;
 import com.mascotanexus.backend.repository.MascotaRepository;
+import com.mascotanexus.backend.repository.SolicitudRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +22,7 @@ class MascotaServiceTest {
     @BeforeEach
     void setUp() {
         mascotaRepository = mock(MascotaRepository.class);
-        mascotaService = new MascotaService(mascotaRepository);
+        mascotaService = new MascotaService(mascotaRepository, mock(SolicitudRepository.class));
     }
 
     @Test

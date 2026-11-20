@@ -15,6 +15,7 @@ function AdminPanel() {
   const [errorRegistro, setErrorRegistro] = useState('');
   const [resumen, setResumen] = useState(null);
   const [errorResumen, setErrorResumen] = useState('');
+  const [errorEliminacion, setErrorEliminacion] = useState('');
 
   const nombreUsuario = localStorage.getItem('nombre');
 
@@ -90,8 +91,19 @@ function AdminPanel() {
     cargarMascotas();
   };
 
-  const eliminarMascota = async (id) => {
-    await axios.delete(`${API_BASE_URL}/mascotas/${id}`);
+  const eliminarMascota = async (mascota) => {
+    try {
+      await axios.delete(`${API_BASE_URL}/mascotas/${mascota.id}`);
+      setErrorEliminacion('');
+    } catch (error) {
+      if (error.response?.status === 409) {
+        setErrorEliminacion(`No se puede eliminar a ${mascota.nombre} porque tiene solicitudes de adopción asociadas.`);
+        return;
+      }
+      setErrorEliminacion(error.response?.status === 404
+        ? `${mascota.nombre} ya no existe; se actualizó la lista.`
+        : `No se pudo eliminar a ${mascota.nombre}. Inténtalo de nuevo.`);
+    }
     cargarMascotas();
   };
 
@@ -261,6 +273,11 @@ function AdminPanel() {
         {/* Inventario de Mascotas */}
         <section className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
           <h3 className="text-lg font-bold text-slate-800 mb-4">📋 Inventario General</h3>
+          {errorEliminacion && (
+            <p className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800" role="alert">
+              {errorEliminacion}
+            </p>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {mascotas.map((m) => (
               <div key={m.id} className="border border-slate-200 rounded-xl p-4 flex items-center space-x-4">
@@ -274,7 +291,7 @@ function AdminPanel() {
                     {m.estado}
                   </span>
                 </div>
-                <button onClick={() => eliminarMascota(m.id)} className="text-xs font-semibold text-red-600 hover:text-red-800">
+                <button onClick={() => eliminarMascota(m)} className="text-xs font-semibold text-red-600 hover:text-red-800">
                   Eliminar
                 </button>
               </div>

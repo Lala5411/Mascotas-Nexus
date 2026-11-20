@@ -10,4 +10,8 @@ public interface SolicitudRepository extends JpaRepository<Solicitud, Long> {
     boolean existsByUsuarioIdAndMascotaIdAndEstado(Long usuarioId, Long mascotaId, String estado);
 
     long countByEstado(String estado);
+
+    boolean existsByMascotaIdAndEstado(Long mascotaId, String estado);
+
+    boolean existsByMascotaId(Long mascotaId);
 }

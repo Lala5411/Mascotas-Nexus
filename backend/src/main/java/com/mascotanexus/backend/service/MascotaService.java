@@ -3,6 +3,7 @@ package com.mascotanexus.backend.service;
 import com.mascotanexus.backend.dto.MascotaResponse;
 import com.mascotanexus.backend.model.Mascota;
 import com.mascotanexus.backend.repository.MascotaRepository;
+import com.mascotanexus.backend.repository.SolicitudRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,9 +22,11 @@ public class MascotaService {
     private static final Set<String> ESTADOS_PERMITIDOS = Set.of(DISPONIBLE, "ADOPTADO");
 
     private final MascotaRepository mascotaRepository;
+    private final SolicitudRepository solicitudRepository;
 
-    public MascotaService(MascotaRepository mascotaRepository) {
+    public MascotaService(MascotaRepository mascotaRepository, SolicitudRepository solicitudRepository) {
         this.mascotaRepository = mascotaRepository;
+        this.solicitudRepository = solicitudRepository;
     }
 
     public List<Mascota> listarTodas() {
@@ -81,6 +84,17 @@ public class MascotaService {
     }
 
     public void eliminar(Long id) {
+        if (!mascotaRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Mascota no encontrada.");
+        }
+        if (solicitudRepository.existsByMascotaIdAndEstado(id, "PENDIENTE")) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "La mascota tiene solicitudes pendientes; respóndelas antes de eliminarla.");
+        }
+        if (solicitudRepository.existsByMascotaId(id)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "La mascota tiene historial de solicitudes y no se puede eliminar.");
+        }
         mascotaRepository.deleteById(id);
     }
 }

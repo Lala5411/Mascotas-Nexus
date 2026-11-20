@@ -2,6 +2,7 @@ package com.mascotanexus.backend.service;
 
 import com.mascotanexus.backend.model.Mascota;
 import com.mascotanexus.backend.repository.MascotaRepository;
+import com.mascotanexus.backend.repository.SolicitudRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,7 @@ class MascotaServiceRegistroTest {
     @BeforeEach
     void setUp() {
         mascotaRepository = mock(MascotaRepository.class);
-        mascotaService = new MascotaService(mascotaRepository);
+        mascotaService = new MascotaService(mascotaRepository, mock(SolicitudRepository.class));
         when(mascotaRepository.save(any(Mascota.class))).thenAnswer(invocacion -> invocacion.getArgument(0));
     }
 
